@@ -3,14 +3,31 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Mic, BarChart3, User, LogOut, Plus, Headphones, Home } from 'lucide-react'
+import { LayoutDashboard, Mic, BarChart3, User, LogOut, Plus, Headphones, Home, ShieldAlert } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
 
 export function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single()
+        setIsAdmin(!!data?.is_admin)
+      }
+    }
+    checkAdmin()
+  }, [supabase])
 
   const items = [
     {
@@ -34,6 +51,14 @@ export function DashboardSidebar() {
       icon: User,
     },
   ]
+
+  if (isAdmin) {
+    items.push({
+      title: 'Admin Panel',
+      href: '/admin',
+      icon: ShieldAlert,
+    })
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

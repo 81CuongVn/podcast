@@ -36,12 +36,14 @@ export async function GET(request: NextRequest) {
 
     // Determine content type
     const contentType = data.type || 'audio/mpeg'
+    const size = data.size
 
     return new NextResponse(data, {
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `inline; filename="${pathname.split('/').pop()}"`,
-        'Cache-Control': 'private, max-age=3600',
+        'Content-Length': size.toString(),
+        'Cache-Control': 'public, max-age=31536000, immutable',
         'Accept-Ranges': 'bytes',
       },
     })
