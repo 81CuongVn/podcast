@@ -10,6 +10,8 @@ import Link from 'next/link'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { Checkbox } from '@/components/ui/checkbox'
+import Image from 'next/image'
+import { ImageIcon, Link as LinkIcon } from 'lucide-react'
 
 export default function CreatePodcastPage() {
   const router = useRouter()
@@ -18,6 +20,7 @@ export default function CreatePodcastPage() {
     title: '',
     description: '',
     category: 'technology',
+    cover_image_url: '',
     is_published: true,
   })
 
@@ -100,6 +103,48 @@ export default function CreatePodcastPage() {
                 }
                 required
               />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="cover_image_url">Thumbnail Image URL</Label>
+                <div className="relative">
+                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="cover_image_url"
+                    placeholder="https://example.com/image.jpg"
+                    className="pl-10"
+                    value={formData.cover_image_url}
+                    onChange={(e) =>
+                      setFormData({ ...formData, cover_image_url: e.target.value })
+                    }
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Paste a direct link to an image (JPG, PNG, or WebP).
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>Preview</Label>
+                <div className="relative aspect-square w-32 overflow-hidden rounded-xl border bg-muted group">
+                  {formData.cover_image_url ? (
+                    <Image
+                      src={formData.cover_image_url}
+                      alt="Thumbnail preview"
+                      fill
+                      className="object-cover"
+                      onError={() => {
+                        toast.error('Invalid image URL');
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="grid gap-2">
