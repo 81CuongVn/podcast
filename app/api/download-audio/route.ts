@@ -19,6 +19,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing pathname' }, { status: 400 })
     }
 
+    // Check if pathname is a full URL (external like YouTube)
+    if (pathname.startsWith('http://') || pathname.startsWith('https://')) {
+      console.log(`External URL detected in download API: ${pathname}. Redirecting...`)
+      return NextResponse.redirect(new URL(pathname))
+    }
+
     // Try to get the file from Supabase Storage
     const bucket = 'podcast-media'
     const { data, error } = await supabase.storage

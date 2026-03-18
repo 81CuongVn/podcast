@@ -39,10 +39,16 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    // Ensure media_url points to our local API for consistent streaming/inline display
+    
+    // Check if the pathname is an external URL (YouTube/Vimeo)
+    const isExternal = episode.audio_pathname?.startsWith('http://') || episode.audio_pathname?.startsWith('https://')
+    
+    // Only proxy via API if it's an internal Supabase Storage path
     const playableEpisode = {
       ...episode,
-      media_url: `/api/download-audio?path=${encodeURIComponent(episode.audio_pathname || '')}`
+      media_url: isExternal 
+        ? (episode.media_url || episode.audio_url) 
+        : `/api/download-audio?path=${encodeURIComponent(episode.audio_pathname || '')}`
     }
     setCurrentEpisode(playableEpisode as any)
     setIsPlayerVisible(true)
