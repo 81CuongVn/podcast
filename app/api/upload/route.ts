@@ -140,5 +140,5 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Increase duration for large file uploads (20 minutes for very large files)
-export const maxDuration = 1200
+// Increase duration for large file uploads (5 minutes max for Hobby plan)
+export const maxDuration = 300
