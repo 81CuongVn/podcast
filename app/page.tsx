@@ -4,9 +4,12 @@ import { Footer } from '@/components/layout/footer'
 import { PodcastGrid } from '@/components/podcast/podcast-grid'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Zap, Users, BarChart3, Headphones, Play, TrendingUp } from 'lucide-react'
+import { Zap, Users, BarChart3, Headphones, Play, TrendingUp, Flame } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+
+// Revalidate every 5 minutes to show fresh content
+export const revalidate = 300
 
 export const metadata = {
   title: 'PodStream - Discover & Create Podcasts',
@@ -48,11 +51,35 @@ async function getRecentEpisodes() {
   return data || []
 }
 
+async function getTrendingPodcasts() {
+  const supabase = await createClient()
+  // Get podcasts with most listens in the last 30 days
+  const { data } = await supabase
+    .from('podcasts')
+    .select('*, profiles(*)')
+    .eq('is_published', true)
+    .order('created_at', { ascending: false })
+    .limit(6)
+  return data || []
+}
+
+async function getPopularCreators() {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('profiles')
+    .select('*, podcasts!user_id(count)')
+    .order('created_at', { ascending: false })
+    .limit(5)
+  return data || []
+}
+
 export default async function HomePage() {
-  const [profile, podcasts, recentEpisodes] = await Promise.all([
+  const [profile, podcasts, recentEpisodes, trendingPodcasts, popularCreators] = await Promise.all([
     getUserProfile(),
     getFeaturedPodcasts(),
     getRecentEpisodes(),
+    getTrendingPodcasts(),
+    getPopularCreators(),
   ])
 
   return (
@@ -234,6 +261,28 @@ export default async function HomePage() {
                   </Card>
                 ))}
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* Trending Podcasts */}
+        {trendingPodcasts.length > 0 && (
+          <section className="border-t border-border py-16">
+            <div className="container mx-auto px-4">
+              <div className="mb-8 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Flame className="h-6 w-6 text-orange-500" />
+                  <div>
+                    <h2 className="text-2xl font-bold md:text-3xl">Trending Now</h2>
+                    <p className="mt-1 text-muted-foreground">Most popular podcasts this week</p>
+                  </div>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link href="/browse?sort=popular">View All</Link>
+                </Button>
+              </div>
+
+              <PodcastGrid podcasts={trendingPodcasts} />
             </div>
           </section>
         )}

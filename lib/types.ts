@@ -22,6 +22,12 @@ export type Podcast = {
   is_published: boolean
   created_at: string
   updated_at: string
+  // Monetization fields
+  is_monetized?: boolean
+  preview_mode?: 'free' | 'preview-only' | 'paid-only'
+  price_usd?: number
+  allow_free_preview?: boolean
+  preview_episode_count?: number
 }
 
 export type PodcastWithUser = Podcast & {
@@ -42,6 +48,10 @@ export type Episode = {
   published_at: string | null
   created_at: string
   updated_at: string
+  // Premium content fields
+  is_premium?: boolean
+  preview_duration_seconds?: number
+  requires_subscription?: boolean
 }
 
 export type EpisodeWithPodcast = Episode & {
