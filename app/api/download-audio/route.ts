@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { get } from '@vercel/blob'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
@@ -13,46 +12,42 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const pathname = request.nextUrl.searchParams.get('pathname')
+    const searchParams = request.nextUrl.searchParams
+    const pathname = searchParams.get('pathname') || searchParams.get('path')
 
     if (!pathname) {
       return NextResponse.json({ error: 'Missing pathname' }, { status: 400 })
     }
 
-    // Verify the user owns this file by checking if pathname starts with their user ID
-    if (!pathname.startsWith(user.id + '/')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    // Try to get the file from Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('podcast-media')
+      .download(pathname)
+
+    if (error) {
+      console.error('Supabase storage download error:', error)
+      return NextResponse.json({ error: 'Failed to download from storage', details: error.message }, { status: 500 })
     }
 
-    const result = await get(pathname, {
-      access: 'private',
-      ifNoneMatch: request.headers.get('if-none-match') ?? undefined,
-    })
-
-    if (!result) {
+    if (!data) {
       return new NextResponse('Not found', { status: 404 })
     }
 
-    // Blob hasn't changed — tell the browser to use its cached copy
-    if (result.statusCode === 304) {
-      return new NextResponse(null, {
-        status: 304,
-        headers: {
-          ETag: result.blob.etag,
-          'Cache-Control': 'private, no-cache',
-        },
-      })
-    }
+    // Determine content type
+    const contentType = data.type || 'audio/mpeg'
 
-    return new NextResponse(result.stream, {
+    return new NextResponse(data, {
       headers: {
-        'Content-Type': result.blob.contentType,
-        ETag: result.blob.etag,
+        'Content-Type': contentType,
+        'Content-Disposition': `attachment; filename="${pathname.split('/').pop()}"`,
         'Cache-Control': 'private, no-cache',
       },
     })
   } catch (error) {
-    console.error('Error serving audio:', error)
-    return NextResponse.json({ error: 'Failed to serve audio' }, { status: 500 })
+    console.error('CRITICAL: Error serving audio:', error)
+    return NextResponse.json({ 
+      error: 'Failed to serve audio', 
+      details: error instanceof Error ? error.message : String(error) 
+    }, { status: 500 })
   }
 }

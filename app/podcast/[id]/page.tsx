@@ -110,7 +110,7 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
           {/* Cover and Actions */}
           <div className="flex flex-col">
             <div className="relative w-full aspect-square bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg overflow-hidden">
-              {podcast.cover_image_url ? (
+              {podcast.cover_image_url && !podcast.cover_image_url.includes('undefined') ? (
                 <Image
                   src={podcast.cover_image_url}
                   alt={podcast.title}

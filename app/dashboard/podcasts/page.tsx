@@ -53,14 +53,18 @@ export default async function PodcastsPage() {
               className="rounded-lg border border-border bg-card hover:shadow-lg transition-shadow overflow-hidden"
             >
               <div className="relative w-full aspect-square bg-gradient-to-br from-blue-400 to-purple-500">
-                {podcast.cover_image_url ? (
+                {podcast.cover_image_url && !podcast.cover_image_url.includes('undefined') ? (
                   <Image
                     src={podcast.cover_image_url}
                     alt={podcast.title}
                     fill
                     className="object-cover"
                   />
-                ) : null}
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Music className="w-12 h-12 text-white opacity-30" />
+                  </div>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="font-bold text-lg line-clamp-2">{podcast.title}</h3>

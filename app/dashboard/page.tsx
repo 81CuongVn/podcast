@@ -77,7 +77,7 @@ export default async function DashboardPage() {
                 className="rounded-lg border border-border bg-card hover:shadow-lg transition-shadow overflow-hidden"
               >
                 <div className="relative w-full aspect-square bg-gradient-to-br from-blue-400 to-purple-500">
-                  {podcast.cover_image_url ? (
+                  {podcast.cover_image_url && !podcast.cover_image_url.includes('undefined') ? (
                     <Image
                       src={podcast.cover_image_url}
                       alt={podcast.title}

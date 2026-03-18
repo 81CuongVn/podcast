@@ -16,7 +16,7 @@ export function PodcastCard({ podcast }: PodcastCardProps) {
   return (
     <Link href={`/podcast/${podcast.id}`}>
       <div className="group cursor-pointer overflow-hidden rounded-lg border bg-card hover:shadow-lg transition-shadow">
-        {podcast.cover_image_url ? (
+        {podcast.cover_image_url && !podcast.cover_image_url.includes('undefined') ? (
           <div className="relative w-full aspect-square overflow-hidden bg-muted">
             <Image
               src={podcast.cover_image_url}
