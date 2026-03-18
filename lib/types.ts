@@ -52,6 +52,7 @@ export type Episode = {
   is_premium?: boolean
   preview_duration_seconds?: number
   requires_subscription?: boolean
+  media_url?: string
 }
 
 export type EpisodeWithPodcast = Episode & {

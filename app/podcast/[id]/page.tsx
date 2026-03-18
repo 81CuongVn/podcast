@@ -127,7 +127,9 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
             <div className="mt-6 space-y-3">
               {user ? (
                 <>
-                  <SubscribeButton podcastId={podcast.id} isSubscribed={isSubscribed} className="w-full" />
+                  <div className="w-full">
+                    <SubscribeButton podcastId={podcast.id} isSubscribed={isSubscribed} />
+                  </div>
                   <Button variant="outline" className="w-full">
                     <Share2 className="w-4 h-4 mr-2" />
                     Share

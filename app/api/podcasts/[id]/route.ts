@@ -36,7 +36,7 @@ export async function GET(
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (!user || user.id !== podcast?.profiles?.id) {
+      if (!user || user.id !== (podcast?.profiles as any)?.id) {
         return NextResponse.json({ error: 'Not found' }, { status: 404 })
       }
     }

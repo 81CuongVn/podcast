@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Play } from 'lucide-react'
 import Link from 'next/link'
 import { usePlayer } from '@/lib/player-context'
-import type { Episode } from '@/lib/types'
+import type { Episode } from '@/lib/types/database'
 
 interface HeroButtonsProps {
   profile: any

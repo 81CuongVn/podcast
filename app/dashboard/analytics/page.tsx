@@ -113,7 +113,7 @@ export default async function AnalyticsPage() {
                   </div>
                   <div className="rounded-lg border border-border bg-card p-6">
                     <div className="text-sm font-medium text-muted-foreground">Episodes</div>
-                    <div className="mt-2 text-4xl font-bold">{analytics.episodes.length}</div>
+                    <div className="mt-2 text-4xl font-bold">{analytics.episodes?.length || 0}</div>
                     <p className="mt-2 text-xs text-muted-foreground">published</p>
                   </div>
                 </div>
@@ -121,7 +121,7 @@ export default async function AnalyticsPage() {
                 {/* Episode Performance */}
                 <div className="rounded-lg border border-border bg-card p-6">
                   <h2 className="text-2xl font-bold mb-6">Episode Performance</h2>
-                  {analytics.episodes.length > 0 ? (
+                  {analytics.episodes && analytics.episodes.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>

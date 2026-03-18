@@ -24,7 +24,7 @@ export function GlobalPlayer() {
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
 
-  const audioUrl = currentEpisode?.media_url || currentEpisode?.audio_url
+  const audioUrl = currentEpisode?.audio_url || ''
   const isYouTube = audioUrl?.includes('youtube.com') || audioUrl?.includes('youtu.be')
 
   useEffect(() => {
@@ -80,9 +80,6 @@ export function GlobalPlayer() {
 
   if (!currentEpisode || !isPlayerVisible) return null
 
-  const audioUrl = currentEpisode.media_url || currentEpisode.audio_url
-  const isYouTube = audioUrl?.includes('youtube.com') || audioUrl?.includes('youtu.be')
-
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border p-4 shadow-2xl animate-in slide-in-from-bottom duration-300">
       {!isYouTube && (
@@ -99,9 +96,9 @@ export function GlobalPlayer() {
         {/* Episode Info */}
         <div className="flex items-center gap-4 w-full md:w-1/4">
           <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-            {currentEpisode.podcasts?.cover_image_url ? (
+            {currentEpisode.podcast?.cover_image_url ? (
               <Image
-                src={currentEpisode.podcasts.cover_image_url}
+                src={currentEpisode.podcast.cover_image_url}
                 alt={currentEpisode.title}
                 fill
                 className="object-cover"
@@ -113,7 +110,7 @@ export function GlobalPlayer() {
           <div className="min-w-0">
             <h4 className="font-semibold text-sm truncate">{currentEpisode.title}</h4>
             <p className="text-xs text-muted-foreground truncate">
-              {currentEpisode.podcasts?.title || 'Playing now'}
+              {currentEpisode.podcast?.title || 'Playing now'}
             </p>
           </div>
         </div>
