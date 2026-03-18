@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, description, category, language } = body
+    const { title, description, category, language, is_published } = body
 
     if (!title) {
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         category: category || null,
         language: language || 'en',
-        is_published: false,
+        is_published: is_published ?? true,
       })
       .select()
       .single()

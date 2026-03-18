@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
+import { toast } from 'sonner'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 interface PodcastFormProps {
   podcastId?: string
@@ -20,7 +23,8 @@ export function PodcastForm({ podcastId, initialData, onSuccess }: PodcastFormPr
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
-    categoryId: initialData?.category_id || '1',
+    categoryId: initialData?.category || 'technology',
+    isPublished: initialData?.is_published ?? true,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,34 +37,47 @@ export function PodcastForm({ podcastId, initialData, onSuccess }: PodcastFormPr
           title: formData.title,
           description: formData.description,
           categoryId: formData.categoryId,
+          isPublished: formData.isPublished,
         })
+        toast.success('Podcast updated successfully!')
       } else {
         await createPodcast({
           title: formData.title,
           description: formData.description,
           categoryId: formData.categoryId,
+          isPublished: formData.isPublished,
         })
+        toast.success('Podcast created successfully!')
       }
 
       onSuccess?.()
       router.push('/dashboard')
       router.refresh()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving podcast:', error)
+      toast.error(error.message || 'Failed to save podcast. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   const categories = [
-    { id: '1', name: 'Technology' },
-    { id: '2', name: 'Business' },
-    { id: '3', name: 'Education' },
-    { id: '4', name: 'Entertainment' },
-    { id: '5', name: 'Health' },
-    { id: '6', name: 'News' },
-    { id: '7', name: 'Sports' },
-    { id: '8', name: 'Other' },
+    { value: 'technology', label: 'Technology' },
+    { value: 'business', label: 'Business' },
+    { value: 'comedy', label: 'Comedy' },
+    { value: 'education', label: 'Education' },
+    { value: 'health', label: 'Health & Fitness' },
+    { value: 'news', label: 'News' },
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+    { value: 'true-crime', label: 'True Crime' },
+    { value: 'science', label: 'Science' },
+    { value: 'society', label: 'Society & Culture' },
+    { value: 'arts', label: 'Arts' },
+    { value: 'fiction', label: 'Fiction' },
+    { value: 'gaming', label: 'Gaming' },
+    { value: 'tv-film', label: 'TV & Film' },
+    { value: 'interview', label: 'Interviews' },
   ]
 
   return (
@@ -94,11 +111,22 @@ export function PodcastForm({ podcastId, initialData, onSuccess }: PodcastFormPr
             className="w-full px-3 py-2 border rounded-md bg-background"
           >
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="isPublished"
+            checked={formData.isPublished}
+            onCheckedChange={(checked) => 
+              setFormData({ ...formData, isPublished: checked === true })
+            }
+          />
+          <Label htmlFor="isPublished">Publish podcast (visible to everyone)</Label>
         </div>
 
         <div className="flex gap-2">

@@ -7,6 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
 
 interface EditPageProps {
   params: Promise<{ id: string }>
@@ -19,8 +23,9 @@ export default function EditPodcastPage({ params }: EditPageProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: '',
+    category: 'technology',
     cover_image_url: '',
+    is_published: true,
   })
   const router = useRouter()
   const supabase = createClient()
@@ -40,8 +45,9 @@ export default function EditPodcastPage({ params }: EditPageProps) {
         setFormData({
           title: data.title,
           description: data.description,
-          category: data.category,
+          category: data.category || 'technology',
           cover_image_url: data.cover_image_url || '',
+          is_published: data.is_published ?? true,
         })
       }
 
@@ -58,19 +64,47 @@ export default function EditPodcastPage({ params }: EditPageProps) {
     try {
       const { error } = await supabase
         .from('podcasts')
-        .update(formData)
+        .update({
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          cover_image_url: formData.cover_image_url,
+          is_published: formData.is_published,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', podcastId)
 
       if (error) throw error
 
+      toast.success('Podcast updated successfully!')
       router.push('/dashboard')
-    } catch (error) {
+      router.refresh()
+    } catch (error: any) {
       console.error('Error updating podcast:', error)
-      alert('Failed to update podcast')
+      toast.error(error.message || 'Failed to update podcast')
     } finally {
       setIsSaving(false)
     }
   }
+
+  const categories = [
+    { value: 'technology', label: 'Technology' },
+    { value: 'business', label: 'Business' },
+    { value: 'comedy', label: 'Comedy' },
+    { value: 'education', label: 'Education' },
+    { value: 'health', label: 'Health & Fitness' },
+    { value: 'news', label: 'News' },
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+    { value: 'true-crime', label: 'True Crime' },
+    { value: 'science', label: 'Science' },
+    { value: 'society', label: 'Society & Culture' },
+    { value: 'arts', label: 'Arts' },
+    { value: 'fiction', label: 'Fiction' },
+    { value: 'gaming', label: 'Gaming' },
+    { value: 'tv-film', label: 'TV & Film' },
+    { value: 'interview', label: 'Interviews' },
+  ]
 
   if (loading) {
     return (
@@ -99,76 +133,72 @@ export default function EditPodcastPage({ params }: EditPageProps) {
 
         <Card className="mt-8 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="text-sm font-medium">Podcast Title</label>
+            <div className="grid gap-2">
+              <Label htmlFor="title">Podcast Title</Label>
               <Input
+                id="title"
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
                 required
-                className="mt-2"
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <textarea
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
                 required
                 rows={4}
-                className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Category</label>
+            <div className="grid gap-2">
+              <Label htmlFor="category">Category</Label>
               <select
+                id="category"
                 value={formData.category}
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
+                className="w-full px-3 py-2 border rounded-md bg-background"
                 required
-                className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="">Select a category</option>
-                <option value="Technology">Technology</option>
-                <option value="Business">Business</option>
-                <option value="Comedy">Comedy</option>
-                <option value="Education">Education</option>
-                <option value="Sports">Sports</option>
-                <option value="Music">Music</option>
-                <option value="True Crime">True Crime</option>
-                <option value="News">News</option>
-                <option value="Lifestyle">Lifestyle</option>
-                <option value="Other">Other</option>
+                {categories.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
               </select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Cover Image URL</label>
-              <Input
-                type="url"
-                value={formData.cover_image_url}
-                onChange={(e) =>
-                  setFormData({ ...formData, cover_image_url: e.target.value })
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_published"
+                checked={formData.is_published}
+                onCheckedChange={(checked) => 
+                  setFormData({ ...formData, is_published: checked === true })
                 }
-                className="mt-2"
               />
+              <Label htmlFor="is_published">Publish podcast (visible to everyone)</Label>
             </div>
 
-            <div className="flex gap-2">
-              <Button type="submit" disabled={isSaving}>
+            <div className="flex gap-4">
+              <Button type="submit" disabled={isSaving} className="flex-1">
                 {isSaving ? 'Saving...' : 'Save Changes'}
               </Button>
-              <Link href="/dashboard">
-                <Button type="button" variant="outline">
-                  Cancel
-                </Button>
-              </Link>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+              >
+                Cancel
+              </Button>
             </div>
           </form>
         </Card>

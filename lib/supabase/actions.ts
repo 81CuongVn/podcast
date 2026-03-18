@@ -106,6 +106,7 @@ export async function createPodcast(podcastData: {
   description: string
   categoryId: string
   coverImageUrl?: string
+  isPublished?: boolean
 }) {
   const supabase = await createClient()
   const {
@@ -121,9 +122,9 @@ export async function createPodcast(podcastData: {
         user_id: user.id,
         title: podcastData.title,
         description: podcastData.description,
-        // Database column is `category`, not `category_id`
         category: podcastData.categoryId,
         cover_image_url: podcastData.coverImageUrl,
+        is_published: podcastData.isPublished ?? true,
       },
     ])
     .select()
@@ -140,6 +141,7 @@ export async function updatePodcast(
     description: string
     categoryId: string
     coverImageUrl: string
+    isPublished: boolean
   }>
 ) {
   const supabase = await createClient()
@@ -154,9 +156,9 @@ export async function updatePodcast(
     .update({
       title: updates.title,
       description: updates.description,
-      // Database column is `category`, not `category_id`
       category: updates.categoryId,
       cover_image_url: updates.coverImageUrl,
+      is_published: updates.isPublished,
       updated_at: new Date().toISOString(),
     })
     .eq('id', podcastId)

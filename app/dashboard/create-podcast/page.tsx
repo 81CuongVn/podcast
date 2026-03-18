@@ -8,21 +8,22 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export default function CreatePodcastPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: 'technology',
+    is_published: true,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError(null)
 
     try {
       const response = await fetch('/api/podcasts', {
@@ -32,17 +33,38 @@ export default function CreatePodcastPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create podcast')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create podcast')
       }
 
-      const { id } = await response.json()
-      router.push(`/dashboard/podcast/${id}`)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const data = await response.json()
+      toast.success('Podcast created successfully!')
+      router.push(`/dashboard/podcast/${data.id}`)
+    } catch (err: any) {
+      toast.error(err.message || 'An error occurred while creating the podcast')
     } finally {
       setIsLoading(false)
     }
   }
+
+  const categories = [
+    { value: 'technology', label: 'Technology' },
+    { value: 'business', label: 'Business' },
+    { value: 'comedy', label: 'Comedy' },
+    { value: 'education', label: 'Education' },
+    { value: 'health', label: 'Health & Fitness' },
+    { value: 'news', label: 'News' },
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+    { value: 'true-crime', label: 'True Crime' },
+    { value: 'science', label: 'Science' },
+    { value: 'society', label: 'Society & Culture' },
+    { value: 'arts', label: 'Arts' },
+    { value: 'fiction', label: 'Fiction' },
+    { value: 'gaming', label: 'Gaming' },
+    { value: 'tv-film', label: 'TV & Film' },
+    { value: 'interview', label: 'Interviews' },
+  ]
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,6 +112,7 @@ export default function CreatePodcastPage() {
                   setFormData({ ...formData, description: e.target.value })
                 }
                 required
+                rows={4}
               />
             </div>
 
@@ -101,22 +124,27 @@ export default function CreatePodcastPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                className="w-full px-3 py-2 border rounded-md bg-background"
+                required
               >
-                <option value="technology">Technology</option>
-                <option value="business">Business</option>
-                <option value="education">Education</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="sports">Sports</option>
-                <option value="news">News</option>
-                <option value="lifestyle">Lifestyle</option>
-                <option value="other">Other</option>
+                {categories.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
               </select>
             </div>
 
-            {error && (
-              <p className="text-sm text-red-500">{error}</p>
-            )}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_published"
+                checked={formData.is_published}
+                onCheckedChange={(checked) => 
+                  setFormData({ ...formData, is_published: checked === true })
+                }
+              />
+              <Label htmlFor="is_published">Publish podcast (visible to everyone)</Label>
+            </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating...' : 'Create Podcast'}
