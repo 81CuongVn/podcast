@@ -169,10 +169,6 @@ export function Header() {
           </div>
         </div>
       )}
-
-          )}
-        </div>
-      </div>
     </header>
   )
 }
