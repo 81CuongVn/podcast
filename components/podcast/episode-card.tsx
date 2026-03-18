@@ -3,10 +3,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { Play, Pause, Download } from 'lucide-react'
+import { Play, Pause, Download, Share2 } from 'lucide-react'
 import type { Episode } from '@/lib/types'
 import { usePlayer } from '@/lib/player-context'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 interface EpisodeCardProps {
   episode: Episode & { podcasts?: { title: string; id: string } }
@@ -56,6 +57,14 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
     }
   }
 
+  const handleShare = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const url = `${window.location.origin}/podcast/${episode.podcast_id}`
+    navigator.clipboard.writeText(url)
+    toast.success('Link copied to clipboard!')
+  }
+
   return (
     <Card className="hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
       <CardHeader className="pb-2">
@@ -75,6 +84,15 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
           </div>
           
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleShare}
+              className="rounded-full h-10 w-10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Share"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
             <Button
               variant="outline"
               size="icon"

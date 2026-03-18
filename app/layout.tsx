@@ -10,9 +10,22 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'PodHub - Create & Share Podcasts',
-  description: 'Discover amazing podcasts, create your own shows, and build your audience on PodHub',
-  generator: 'v0.app',
+  title: 'PodHub - The Professional Podcast Hosting & Distribution Platform',
+  description: 'Create, host, and distribute your podcasts to Spotify, Apple Podcasts, and more. Advanced analytics, professional tools, and a global audience await you on PodHub.',
+  keywords: 'podcast hosting, podcast distribution, create podcast, podcast analytics, podcast platform, audio streaming',
+  authors: [{ name: 'PodHub Team' }],
+  openGraph: {
+    title: 'PodHub - Create & Share Podcasts',
+    description: 'Discover amazing podcasts and build your audience on the world\'s most professional hosting platform.',
+    type: 'website',
+    url: 'https://podhub.com',
+    siteName: 'PodHub',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PodHub - Professional Podcast Platform',
+    description: 'The all-in-one platform for modern storytellers.',
+  },
   icons: {
     icon: [
       {
