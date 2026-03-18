@@ -34,7 +34,18 @@ export function AdvancedMediaPlayer({ episode }: AdvancedMediaPlayerProps) {
 
   const mediaUrl = episode.media_url || episode.audio_url
   const mediaType = episode.media_type || 'audio'
+  
+  // Check if it's a YouTube URL
+  const isYouTube = mediaUrl?.includes('youtube.com') || mediaUrl?.includes('youtu.be')
   const isVideo = mediaType === 'video'
+
+  const getYouTubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
+    const match = url.match(regExp)
+    return (match && match[2].length === 11) ? match[2] : null
+  }
+
+  const youtubeId = isYouTube ? getYouTubeId(mediaUrl || '') : null
 
   useEffect(() => {
     const media = mediaRef.current
@@ -132,7 +143,19 @@ export function AdvancedMediaPlayer({ episode }: AdvancedMediaPlayerProps) {
         ref={containerRef}
         className={`w-full mb-6 rounded-lg overflow-hidden bg-black ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
       >
-        {isVideo ? (
+        {isYouTube && youtubeId ? (
+          <div className="w-full aspect-video">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=${isPlaying ? 1 : 0}`}
+              title={episode.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        ) : isVideo ? (
           <video
             ref={mediaRef as React.RefObject<HTMLVideoElement>}
             src={mediaUrl}

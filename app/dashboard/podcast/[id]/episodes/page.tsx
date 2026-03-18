@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
-import { Upload, Trash2, Play } from 'lucide-react'
+import { Upload, Trash2, Play, Youtube, Link as LinkIcon } from 'lucide-react'
 
 type MediaType = 'audio' | 'video' | 'document' | 'transcript'
 
@@ -22,6 +22,8 @@ export default function EpisodesPage({ params }: EpisodesPageProps) {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [mediaType, setMediaType] = useState<MediaType>('audio')
+  const [uploadMethod, setUploadMethod] = useState<'file' | 'url'>('file')
+  const [videoUrl, setVideoUrl] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -135,39 +137,57 @@ export default function EpisodesPage({ params }: EpisodesPageProps) {
       const formData = new FormData(e.currentTarget)
       const title = formData.get('title') as string
       const description = formData.get('description') as string
-      const mediaFile = formData.get('media') as File
+      const mediaFile = formData.get('media') as File | null
 
-      if (!mediaFile) {
+      if (uploadMethod === 'file' && !mediaFile) {
         alert('Please select a media file')
         setUploading(false)
         return
       }
 
-      const fileSizeMB = mediaFile.size / (1024 * 1024)
-      console.log(`Starting upload: ${mediaFile.name} (${fileSizeMB.toFixed(2)}MB)`)
-
-       if (fileSizeMB > MAX_FILE_SIZE_MB) {
-        alert(`File is too large. Maximum allowed size is ${MAX_FILE_SIZE_MB}MB.`)
-        setUploading(false)
-        return
-      }
-
-      // Upload media file (using chunked or direct based on size)
-      const { pathname, url } = await uploadFile(mediaFile)
-      console.log('Upload successful:', { pathname, url })
-
-      // Get duration for audio/video files
+      let pathname = ''
+      let url = ''
       let duration = undefined
-      if (['audio', 'video'].includes(mediaType)) {
-        const element = mediaType === 'video'
-          ? document.createElement('video')
-          : document.createElement('audio')
-        element.src = URL.createObjectURL(mediaFile)
-        duration = await new Promise<number>((resolve) => {
-          element.onloadedmetadata = () => {
-            resolve(Math.round(element.duration))
-          }
-        })
+      let fileSize = 0
+
+      if (uploadMethod === 'file' && mediaFile) {
+        const fileSizeMB = mediaFile.size / (1024 * 1024)
+        console.log(`Starting upload: ${mediaFile.name} (${fileSizeMB.toFixed(2)}MB)`)
+
+        if (fileSizeMB > MAX_FILE_SIZE_MB) {
+          alert(`File is too large. Maximum allowed size is ${MAX_FILE_SIZE_MB}MB.`)
+          setUploading(false)
+          return
+        }
+
+        // Upload media file
+        const uploadResult = await uploadFile(mediaFile)
+        pathname = uploadResult.pathname
+        url = uploadResult.url
+        fileSize = mediaFile.size
+
+        // Get duration
+        if (['audio', 'video'].includes(mediaType)) {
+          const element = mediaType === 'video'
+            ? document.createElement('video')
+            : document.createElement('audio')
+          element.src = URL.createObjectURL(mediaFile)
+          duration = await new Promise<number>((resolve) => {
+            element.onloadedmetadata = () => {
+              resolve(Math.round(element.duration))
+            }
+          })
+        }
+      } else if (uploadMethod === 'url') {
+        if (!videoUrl) {
+          alert('Please enter a valid video URL')
+          setUploading(false)
+          return
+        }
+        // For URLs, we use the URL as the media_url and pathname
+        url = videoUrl
+        pathname = videoUrl
+        // We can't easily get duration or size for external URLs without extra backend processing
       }
 
       // Create episode via API
@@ -182,7 +202,7 @@ export default function EpisodesPage({ params }: EpisodesPageProps) {
           media_url: url,
           duration,
           media_type: mediaType,
-          media_size: mediaFile.size,
+          media_size: fileSize,
         }),
       })
 
@@ -288,20 +308,65 @@ export default function EpisodesPage({ params }: EpisodesPageProps) {
               </select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">
-                {mediaType === 'video' ? 'Video File' : mediaType === 'document' ? 'Document File' : mediaType === 'transcript' ? 'Transcript File' : 'Audio File'}
-              </label>
-              <div className="mt-2 flex items-center gap-4">
-                <Input
-                  name="media"
-                  type="file"
-                  accept={getAcceptedFormats(mediaType)}
-                  required
-                  className="flex-1"
-                />
-              </div>
+            <div className="flex gap-4 p-1 bg-muted rounded-lg">
+              <button
+                type="button"
+                onClick={() => setUploadMethod('file')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${
+                  uploadMethod === 'file' ? 'bg-background shadow-sm' : 'text-muted-foreground'
+                }`}
+              >
+                <Upload className="h-4 w-4" />
+                Upload File
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUploadMethod('url');
+                  setMediaType('video'); // Default to video when using URL
+                }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${
+                  uploadMethod === 'url' ? 'bg-background shadow-sm' : 'text-muted-foreground'
+                }`}
+              >
+                <LinkIcon className="h-4 w-4" />
+                Video URL
+              </button>
             </div>
+
+            {uploadMethod === 'file' ? (
+              <div>
+                <label className="text-sm font-medium">
+                  {mediaType === 'video' ? 'Video File' : mediaType === 'document' ? 'Document File' : mediaType === 'transcript' ? 'Transcript File' : 'Audio File'}
+                </label>
+                <div className="mt-2 flex items-center gap-4">
+                  <Input
+                    name="media"
+                    type="file"
+                    accept={getAcceptedFormats(mediaType)}
+                    required
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="text-sm font-medium">Video URL (YouTube, Vimeo, etc.)</label>
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="url"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <Button type="submit" disabled={uploading}>
               <Upload className="mr-2 h-4 w-4" />

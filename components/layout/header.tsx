@@ -37,40 +37,40 @@ export function Header() {
   const isActive = (href: string) => pathname === href
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-20 items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent">
-            <Mic className="h-5 w-5 text-primary-foreground" />
+        <Link href="/" className="flex items-center gap-2 font-bold text-2xl hover:opacity-80 transition-opacity">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/20">
+            <Mic className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="hidden sm:inline font-semibold">PodStream</span>
+          <span className="hidden sm:inline font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">PodStream</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-10">
           <Link 
             href="/browse" 
-            className={`text-sm font-medium transition-colors ${isActive('/browse') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`text-sm font-semibold transition-all hover:scale-105 ${isActive('/browse') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
           >
             Browse
           </Link>
           <Link 
             href="/discover" 
-            className={`text-sm font-medium transition-colors ${isActive('/discover') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`text-sm font-semibold transition-all hover:scale-105 ${isActive('/discover') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
           >
             Discover
           </Link>
           <Link 
             href="/categories" 
-            className={`text-sm font-medium transition-colors ${isActive('/categories') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`text-sm font-semibold transition-all hover:scale-105 ${isActive('/categories') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
           >
             Categories
           </Link>
           {mounted && user && (
             <Link 
               href="/dashboard" 
-              className={`text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`text-sm font-semibold transition-all hover:scale-105 ${isActive('/dashboard') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
               Dashboard
             </Link>
@@ -78,31 +78,26 @@ export function Header() {
         </nav>
 
         {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-4">
           {mounted && !loading && !user && (
             <>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="font-semibold">
                 <Link href="/auth/login">Sign In</Link>
               </Button>
-              <Button size="sm" asChild className="font-medium">
+              <Button size="lg" asChild className="font-bold shadow-xl shadow-primary/20 rounded-full px-8">
                 <Link href="/auth/sign-up">Get Started</Link>
               </Button>
             </>
           )}
           {mounted && user && (
             <>
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="outline" size="lg" asChild className="font-bold rounded-full px-8">
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="font-semibold">
                 Sign Out
               </Button>
             </>
-          )}
-          {!mounted && (
-            <Button variant="ghost" size="sm" disabled>
-              Loading...
-            </Button>
           )}
         </div>
 

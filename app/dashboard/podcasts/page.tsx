@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { DeletePodcastButton } from '@/components/delete-podcast-button'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, Edit2, Play } from 'lucide-react'
+import { Plus, Edit2, Play, Music } from 'lucide-react'
 
 async function getUser() {
   const supabase = await createClient()

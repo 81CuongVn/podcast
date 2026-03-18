@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { PodcastGrid } from '@/components/podcast/podcast-grid'
+import { EpisodeCard } from '@/components/podcast/episode-card'
+import { HeroButtons } from '@/components/home/hero-buttons'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Zap, Users, BarChart3, Headphones, Play, TrendingUp, Flame } from 'lucide-react'
@@ -88,221 +90,168 @@ export default async function HomePage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-primary/5 to-background">
-          <div className="container mx-auto px-4 py-20 md:py-28">
-            <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+        <section className="relative overflow-hidden pt-20 pb-32 md:pt-32 md:pb-48">
+          {/* Animated Background Gradients */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden">
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px] animate-pulse" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent/20 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+          </div>
+
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-4xl text-center">
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-primary/10 px-6 py-2 text-sm font-bold text-primary shadow-sm border border-primary/20 backdrop-blur-sm">
                 <Headphones className="h-4 w-4" />
-                Over 10,000 podcasts available
+                Trusted by 10,000+ Creators
               </div>
-              <h1 className="mb-6 text-4xl font-bold tracking-tight text-balance md:text-6xl">
-                Discover Your Next Favorite Podcast
+              <h1 className="mb-8 text-5xl font-extrabold tracking-tight text-balance md:text-8xl lg:leading-[1.1]">
+                Your Voice, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Amplified</span>
               </h1>
-              <p className="mb-8 text-lg text-muted-foreground text-balance md:text-xl">
-                Explore thousands of podcasts from creators worldwide. Find new voices, stories, and ideas that inspire you.
+              <p className="mb-12 text-xl text-muted-foreground text-balance md:text-2xl max-w-2xl mx-auto leading-relaxed">
+                The all-in-one platform to record, distribute, and monetize your podcast. Professional tools for modern storytellers.
               </p>
 
-              {!profile && (
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <Button asChild size="lg" className="gap-2">
-                    <Link href="/auth/sign-up">
-                      Get Started Free
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="lg" asChild>
-                    <Link href="/browse">
-                      <Play className="mr-2 h-4 w-4" />
-                      Browse Podcasts
-                    </Link>
-                  </Button>
-                </div>
-              )}
-              {profile && (
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <Button asChild size="lg" className="gap-2">
-                    <Link href="/dashboard/create">
-                      Start Creating
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="lg" asChild>
-                    <Link href="/browse">
-                      Explore Podcasts
-                    </Link>
-                  </Button>
-                </div>
-              )}
+              <HeroButtons 
+                profile={profile} 
+                latestEpisode={recentEpisodes.length > 0 ? recentEpisodes[0] : null} 
+              />
             </div>
           </div>
         </section>
 
-        {/* Features */}
-        <section className="border-b border-border py-16">
+        {/* Dynamic Grid Section */}
+        <section className="py-24 relative overflow-hidden">
           <div className="container mx-auto px-4">
-            <div className="grid gap-8 md:grid-cols-3">
-              <Card className="border-0 bg-transparent shadow-none">
-                <CardContent className="flex gap-4 p-0">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <Zap className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="mb-1 font-semibold">Fresh Episodes Daily</h3>
-                    <p className="text-sm text-muted-foreground">
-                      New content from creators you follow, updated every day
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-0 bg-transparent shadow-none">
-                <CardContent className="flex gap-4 p-0">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="mb-1 font-semibold">Connect & Follow</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Build your community and follow your favorite creators
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-0 bg-transparent shadow-none">
-                <CardContent className="flex gap-4 p-0">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="mb-1 font-semibold">Detailed Analytics</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Track your podcast performance and audience growth
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Podcasts */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold md:text-3xl">Featured Podcasts</h2>
-                <p className="mt-1 text-muted-foreground">Latest shows from our community</p>
-              </div>
-              <Button variant="outline" asChild>
-                <Link href="/browse">View All</Link>
-              </Button>
-            </div>
-
-            {podcasts.length > 0 ? (
-              <PodcastGrid podcasts={podcasts} />
-            ) : (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                  <Headphones className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                  <p className="mb-4 text-muted-foreground">No podcasts yet. Be the first creator!</p>
-                  {profile && (
-                    <Button asChild>
-                      <Link href="/dashboard/create">Create Podcast</Link>
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </section>
-
-        {/* Recent Episodes */}
-        {recentEpisodes.length > 0 && (
-          <section className="border-t border-border bg-muted/30 py-16">
-            <div className="container mx-auto px-4">
-              <div className="mb-8 flex items-center justify-between">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+              {/* Sidebar Info - Modern Layout */}
+              <div className="lg:col-span-4 space-y-12">
                 <div>
-                  <h2 className="text-2xl font-bold md:text-3xl">Recent Episodes</h2>
-                  <p className="mt-1 text-muted-foreground">Fresh content just published</p>
+                  <h2 className="text-4xl font-bold mb-6">Built for the <span className="text-primary">Creator Economy</span></h2>
+                  <p className="text-lg text-muted-foreground leading-relaxed">
+                    We provide the infrastructure so you can focus on what matters: your content.
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="group p-6 rounded-2xl bg-card border border-border transition-all hover:border-primary/50 hover:shadow-xl hover:-translate-y-1">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <Zap className="h-7 w-7" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Instant Publishing</h3>
+                    <p className="text-muted-foreground">Distribute to all major platforms with one click.</p>
+                  </div>
+
+                  <div className="group p-6 rounded-2xl bg-card border border-border transition-all hover:border-primary/50 hover:shadow-xl hover:-translate-y-1">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 mb-4 group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+                      <Users className="h-7 w-7" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Listener Engagement</h3>
+                    <p className="text-muted-foreground">Deep insights into how your audience listens.</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {/* Main Content Area */}
+              <div className="lg:col-span-8">
+                <div className="mb-10 flex items-center justify-between">
+                  <h2 className="text-3xl font-bold tracking-tight">Trending Now</h2>
+                  <Button variant="link" asChild className="text-primary font-bold">
+                    <Link href="/browse?sort=popular">View All Podcasts →</Link>
+                  </Button>
+                </div>
+
+                {podcasts.length > 0 ? (
+                  <PodcastGrid podcasts={podcasts.slice(0, 6)} />
+                ) : (
+                  <div className="rounded-3xl border-2 border-dashed border-border p-20 text-center bg-muted/20">
+                    <Headphones className="mb-6 h-16 w-16 text-muted-foreground/30 mx-auto" />
+                    <p className="text-xl font-medium text-muted-foreground mb-6">Start your journey today.</p>
+                    {profile && (
+                      <Button asChild size="lg" className="rounded-full px-10">
+                        <Link href="/dashboard/create">Launch Your Podcast</Link>
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Recent Episodes Section - Immediate Playback */}
+        {recentEpisodes.length > 0 && (
+          <section className="py-24 bg-muted/30 relative overflow-hidden">
+            <div className="container mx-auto px-4">
+              <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="max-w-2xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
+                    <Flame className="h-3 w-3" />
+                    FRESH CONTENT
+                  </div>
+                  <h2 className="text-4xl font-black tracking-tight">Listen Now</h2>
+                  <p className="mt-4 text-lg text-muted-foreground">
+                    Click play to start listening to the latest episodes right here. No redirection needed.
+                  </p>
+                </div>
+                <Button variant="outline" asChild className="rounded-full font-bold border-2">
+                  <Link href="/browse">Explore All Episodes</Link>
+                </Button>
+              </div>
+
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {recentEpisodes.map((episode: any) => (
-                  <Card key={episode.id} className="overflow-hidden transition-shadow hover:shadow-md">
-                    <CardContent className="flex gap-4 p-4">
-                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
-                        {episode.podcasts?.cover_image_url ? (
-                          <Image
-                            src={episode.podcasts.cover_image_url}
-                            alt={episode.podcasts.title}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-                            <Play className="h-8 w-8 text-primary/40" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 overflow-hidden">
-                        <Link href={`/podcast/${episode.podcast_id}`}>
-                          <h3 className="line-clamp-1 font-semibold hover:text-primary">
-                            {episode.title}
-                          </h3>
-                        </Link>
-                        <p className="line-clamp-1 text-sm text-muted-foreground">
-                          {episode.podcasts?.title}
-                        </p>
-                        {episode.description && (
-                          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                            {episode.description}
-                          </p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <EpisodeCard key={episode.id} episode={episode} />
                 ))}
               </div>
             </div>
           </section>
         )}
 
-        {/* Trending Podcasts */}
-        {trendingPodcasts.length > 0 && (
-          <section className="border-t border-border py-16">
-            <div className="container mx-auto px-4">
-              <div className="mb-8 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Flame className="h-6 w-6 text-orange-500" />
+        {/* Featured Creators Section */}
+        <section className="py-24 bg-foreground text-background">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold mb-4">Top Creators</h2>
+              <p className="text-muted-foreground/80 text-lg">The voices shaping the future of audio.</p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+              {popularCreators.map((creator: any) => (
+                <div key={creator.id} className="flex flex-col items-center text-center space-y-4 group">
+                  <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-background/10 group-hover:border-primary transition-all duration-500">
+                    {creator.avatar_url ? (
+                      <Image src={creator.avatar_url} alt={creator.display_name} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center text-3xl font-bold text-muted-foreground">
+                        {creator.display_name?.charAt(0)}
+                      </div>
+                    )}
+                  </div>
                   <div>
-                    <h2 className="text-2xl font-bold md:text-3xl">Trending Now</h2>
-                    <p className="mt-1 text-muted-foreground">Most popular podcasts this week</p>
+                    <h3 className="font-bold text-lg">{creator.display_name}</h3>
+                    <p className="text-sm text-muted-foreground/60">@{creator.username}</p>
                   </div>
                 </div>
-                <Button variant="outline" asChild>
-                  <Link href="/browse?sort=popular">View All</Link>
-                </Button>
-              </div>
-
-              <PodcastGrid podcasts={trendingPodcasts} />
+              ))}
             </div>
-          </section>
-        )}
+          </div>
+        </section>
 
-        {/* CTA Section */}
+        {/* CTA Section - Premium Look */}
         {!profile && (
-          <section className="py-20">
+          <section className="py-32 relative">
             <div className="container mx-auto px-4">
-              <Card className="overflow-hidden bg-gradient-to-r from-primary to-accent">
-                <CardContent className="flex flex-col items-center py-16 text-center text-primary-foreground">
-                  <TrendingUp className="mb-4 h-12 w-12" />
-                  <h2 className="mb-4 text-3xl font-bold">Ready to Start Creating?</h2>
-                  <p className="mb-8 max-w-md text-lg opacity-90">
-                    Launch your podcast and reach listeners worldwide. It&apos;s free to get started.
+              <div className="relative rounded-[3rem] overflow-hidden bg-primary p-12 md:p-24 text-center">
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent/40 to-transparent" />
+                <div className="relative z-10">
+                  <h2 className="text-4xl md:text-6xl font-black text-white mb-8">Ready to broadcast?</h2>
+                  <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">
+                    Join thousands of creators who chose PodStream to host their shows. Get all features free for 14 days.
                   </p>
-                  <Button asChild size="lg" variant="secondary" className="font-semibold">
-                    <Link href="/auth/sign-up">Start Your Podcast</Link>
+                  <Button asChild size="lg" variant="secondary" className="h-16 px-12 text-xl font-bold rounded-full shadow-2xl hover:scale-105 transition-all">
+                    <Link href="/auth/sign-up">Get Started Now</Link>
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </section>
         )}

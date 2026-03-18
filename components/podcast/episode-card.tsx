@@ -3,8 +3,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { Play } from 'lucide-react'
+import { Play, Pause, Download } from 'lucide-react'
 import type { Episode } from '@/lib/types'
+import { usePlayer } from '@/lib/player-context'
+import { Button } from '@/components/ui/button'
 
 interface EpisodeCardProps {
   episode: Episode & { podcasts?: { title: string; id: string } }
@@ -12,6 +14,10 @@ interface EpisodeCardProps {
 }
 
 export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
+  const { currentEpisode, setCurrentEpisode, setIsPlayerVisible } = usePlayer()
+  
+  const isPlaying = currentEpisode?.id === episode.id
+
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return ''
     const mins = Math.floor(seconds / 60)
@@ -19,40 +25,94 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  const handlePlay = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrentEpisode(episode)
+    setIsPlayerVisible(true)
+  }
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const url = episode.media_url || episode.audio_url
+    if (url) {
+      window.open(`/api/download-audio?path=${encodeURIComponent(episode.audio_pathname)}`, '_blank')
+    }
+  }
+
   return (
-    <Link href={`/episode/${episode.id}`}>
-      <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1">
-              <CardTitle className="line-clamp-2 text-base">
+    <Card className="hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <Link href={`/podcast/${episode.podcast_id}`} className="hover:text-primary transition-colors">
+              <CardTitle className="line-clamp-2 text-lg leading-tight group-hover:text-primary transition-colors">
                 {episode.title}
               </CardTitle>
-              {showPodcast && episode.podcasts && (
-                <CardDescription className="mt-1">
-                  {episode.podcasts.title}
-                </CardDescription>
-              )}
-            </div>
-            <Play className="w-5 h-5 text-primary shrink-0 mt-1" />
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {episode.description && (
-            <CardDescription className="line-clamp-2">
-              {episode.description}
-            </CardDescription>
-          )}
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>
-              {new Date(episode.created_at).toLocaleDateString()}
-            </span>
-            {episode.duration && (
-              <span>{formatDuration(episode.duration)}</span>
+            </Link>
+            {showPodcast && episode.podcasts && (
+              <CardDescription className="mt-1 font-medium flex items-center gap-1.5">
+                <span className="h-1 w-1 rounded-full bg-primary" />
+                {episode.podcasts.title}
+              </CardDescription>
             )}
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleDownload}
+              className="rounded-full h-10 w-10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Download"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              onClick={handlePlay}
+              className={`rounded-full h-12 w-12 shrink-0 shadow-lg transition-all duration-300 hover:scale-110 ${
+                isPlaying ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground'
+              }`}
+            >
+              {isPlaying ? (
+                <Pause className="h-6 w-6" />
+              ) : (
+                <Play className="h-6 w-6 ml-0.5" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        {episode.description && (
+          <p className="line-clamp-2 text-sm text-muted-foreground leading-relaxed">
+            {episode.description}
+          </p>
+        )}
+        
+        <div className="flex items-center justify-between text-xs font-medium text-muted-foreground border-t border-border/50 pt-4">
+          <div className="flex items-center gap-3">
+            <span>{new Date(episode.created_at).toLocaleDateString()}</span>
+            {episode.duration && (
+              <span className="flex items-center gap-1.5">
+                <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                {formatDuration(episode.duration)}
+              </span>
+            )}
+          </div>
+          
+          <Link 
+            href={`/podcast/${episode.podcast_id}`} 
+            className="text-primary hover:underline font-bold"
+          >
+            Details →
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
+
