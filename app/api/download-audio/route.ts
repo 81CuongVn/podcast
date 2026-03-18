@@ -20,12 +20,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Try to get the file from Supabase Storage
+    // Use bucket 'podcasts' instead of 'podcast-media' based on common patterns in the app
+    const bucket = 'podcasts'
     const { data, error } = await supabase.storage
-      .from('podcast-media')
+      .from(bucket)
       .download(pathname)
 
     if (error) {
-      console.error('Supabase storage download error:', error)
+      console.error(`Supabase storage download error (Bucket: ${bucket}):`, error)
       return NextResponse.json({ error: 'Failed to download from storage', details: error.message }, { status: 500 })
     }
 
@@ -39,8 +41,9 @@ export async function GET(request: NextRequest) {
     return new NextResponse(data, {
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${pathname.split('/').pop()}"`,
-        'Cache-Control': 'private, no-cache',
+        'Content-Disposition': `inline; filename="${pathname.split('/').pop()}"`,
+        'Cache-Control': 'private, max-age=3600',
+        'Accept-Ranges': 'bytes',
       },
     })
   } catch (error) {

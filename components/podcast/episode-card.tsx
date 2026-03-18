@@ -19,16 +19,31 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
   const isPlaying = currentEpisode?.id === episode.id
 
   const formatDuration = (seconds: number | null) => {
-    if (!seconds) return ''
+    if (seconds === null || seconds === undefined || isNaN(seconds)) return '0:00'
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'Recently'
+      return date.toLocaleDateString()
+    } catch (e) {
+      return 'Recently'
+    }
+  }
+
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setCurrentEpisode(episode)
+    // Ensure media_url points to our local API for consistent streaming/inline display
+    const playableEpisode = {
+      ...episode,
+      media_url: `/api/download-audio?path=${encodeURIComponent(episode.audio_pathname || '')}`
+    }
+    setCurrentEpisode(playableEpisode as any)
     setIsPlayerVisible(true)
   }
 
@@ -95,7 +110,7 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
         
         <div className="flex items-center justify-between text-xs font-medium text-muted-foreground border-t border-border/50 pt-4">
           <div className="flex items-center gap-3">
-            <span>{new Date(episode.created_at).toLocaleDateString()}</span>
+            <span>{formatDate(episode.published_at || episode.created_at)}</span>
             {episode.duration && (
               <span className="flex items-center gap-1.5">
                 <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />

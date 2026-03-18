@@ -20,16 +20,16 @@ export async function POST(request: NextRequest) {
 
     // Check if already subscribed
     const { data: existing } = await supabase
-      .from('subscriptions')
+      .from('podcast_subscriptions')
       .select('*')
       .eq('user_id', user.id)
       .eq('podcast_id', podcastId)
-      .single()
+      .maybeSingle()
 
     if (existing) {
       // Unsubscribe
       const { error } = await supabase
-        .from('subscriptions')
+        .from('podcast_subscriptions')
         .delete()
         .eq('user_id', user.id)
         .eq('podcast_id', podcastId)
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ action: 'unsubscribed' })
     } else {
       // Subscribe
-      const { error } = await supabase.from('subscriptions').insert([
+      const { error } = await supabase.from('podcast_subscriptions').insert([
         {
           user_id: user.id,
           podcast_id: podcastId,
