@@ -20,14 +20,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Try to get the file from Supabase Storage
-    // Use bucket 'podcasts' instead of 'podcast-media' based on common patterns in the app
-    const bucket = 'podcasts'
+    const bucket = 'podcast-media'
     const { data, error } = await supabase.storage
       .from(bucket)
       .download(pathname)
 
     if (error) {
-      console.error(`Supabase storage download error (Bucket: ${bucket}):`, error)
+      console.error(`Supabase storage download error (Bucket: ${bucket}, Path: ${pathname}):`, error)
       return NextResponse.json({ error: 'Failed to download from storage', details: error.message }, { status: 500 })
     }
 
