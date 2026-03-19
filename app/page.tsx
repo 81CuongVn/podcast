@@ -4,6 +4,7 @@ import { Footer } from '@/components/layout/footer'
 import { PodcastGrid } from '@/components/podcast/podcast-grid'
 import { EpisodeCard } from '@/components/podcast/episode-card'
 import { HeroButtons } from '@/components/home/hero-buttons'
+import { SwirlingVoiceBackground } from '@/components/home/swirling-voice-background'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Zap, Users, BarChart3, Headphones, Play, TrendingUp, Flame, Share2, Mail, CheckCircle2, ShieldCheck } from 'lucide-react'
@@ -92,6 +93,7 @@ export default async function HomePage() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden pt-20 pb-32 md:pt-32 md:pb-48">
+          <SwirlingVoiceBackground />
           {/* Animated Background Gradients */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden">
             <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/20 blur-[140px] animate-pulse" />

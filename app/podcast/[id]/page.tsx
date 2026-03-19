@@ -110,6 +110,10 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
   }
 
   const latestEpisode = episodes[0]
+  // Deduplicate episodes based on ID to prevent duplicate broadcasts
+  const uniqueEpisodes = episodes.filter((episode, index, self) =>
+    index === self.findIndex((e) => e.id === episode.id)
+  )
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -239,9 +243,9 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
               </h2>
             </div>
 
-            {episodes.length > 0 ? (
+            {uniqueEpisodes.length > 0 ? (
               <div className="space-y-4">
-                {episodes.map((episode, idx) => (
+                {uniqueEpisodes.map((episode, idx) => (
                   <div 
                     key={episode.id} 
                     className={cn(
