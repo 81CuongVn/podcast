@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
 interface EpisodeCardProps {
-  episode: Episode & { podcasts?: { title: string; id: string } }
+  episode: Episode & { podcasts?: { title: string; id: string; cover_image_url?: string | null } }
   showPodcast?: boolean
 }
 
@@ -162,4 +162,5 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
       </CardContent>
     </Card>
   )
+}
 
