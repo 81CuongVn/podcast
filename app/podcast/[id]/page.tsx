@@ -89,7 +89,7 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
       // Check if subscribed
       if (currentUser) {
         const { data: subscription } = await supabase
-          .from('subscriptions')
+          .from('podcast_subscriptions')
           .select('id')
           .eq('user_id', currentUser.id)
           .eq('podcast_id', id)

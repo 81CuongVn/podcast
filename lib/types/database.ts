@@ -63,6 +63,14 @@ export type Subscription = {
   created_at: string
 }
 
+export type Like = {
+  id: string
+  user_id: string
+  podcast_id: string | null
+  episode_id: string | null
+  created_at: string
+}
+
 export type Listen = {
   id: string
   user_id: string | null

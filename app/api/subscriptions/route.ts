@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     const { data, error } = await supabase
-      .from('subscriptions')
+      .from('podcast_subscriptions')
       .insert({
         user_id: user.id,
         podcast_id,
@@ -73,7 +73,7 @@ export async function DELETE(request: Request) {
     }
 
     const { error } = await supabase
-      .from('subscriptions')
+      .from('podcast_subscriptions')
       .delete()
       .eq('user_id', user.id)
       .eq('podcast_id', podcast_id)

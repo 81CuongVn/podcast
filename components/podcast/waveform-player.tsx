@@ -78,7 +78,10 @@ export function WaveformPlayer({
   }, [audioUrl, waveColor, progressColor, barWidth, barGap, height, onReady, seekTo, isYouTube])
 
   useEffect(() => {
-    initWaveSurfer()
+    const cleanup = initWaveSurfer()
+    return () => {
+      cleanup?.()
+    }
   }, [initWaveSurfer])
 
   // Sync WaveSurfer position with global player's currentTime
