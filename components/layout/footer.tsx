@@ -18,10 +18,10 @@ export function Footer() {
               Create and share podcasts with the world. Discover amazing shows from creators everywhere. Build your audience and grow together.
             </p>
             <div className="mt-4 flex gap-4">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://twitter.com/johnweek45" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://github.com/81CuongVn" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Github className="h-5 w-5" />
               </a>
               <a href="mailto:support@podstream.com" className="text-muted-foreground hover:text-primary transition-colors">
