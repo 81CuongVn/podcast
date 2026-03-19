@@ -14,6 +14,13 @@ interface PlayerContextType {
   setIsLoop: (loop: boolean) => void
   isShuffle: boolean
   setIsShuffle: (shuffle: boolean) => void
+  currentTime: number
+  setCurrentTime: (time: number) => void
+  duration: number
+  setDuration: (duration: number) => void
+  seekTo: (time: number) => void
+  setSeekTo: (time: number | null) => void
+  seekToValue: number | null
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined)
@@ -24,11 +31,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoop, setIsLoop] = useState(false)
   const [isShuffle, setIsShuffle] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [seekToValue, setSeekToValue] = useState<number | null>(null)
 
   const handleSetCurrentEpisode = (episode: Episode | null) => {
     setCurrentEpisode(episode)
     setIsPlayerVisible(episode !== null)
-    if (episode) setIsPlaying(true)
+    if (episode) {
+      setIsPlaying(true)
+      setCurrentTime(0)
+    }
+  }
+
+  const seekTo = (time: number) => {
+    setSeekToValue(time)
   }
 
   return (
@@ -44,6 +61,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setIsLoop,
         isShuffle,
         setIsShuffle,
+        currentTime,
+        setCurrentTime,
+        duration,
+        setDuration,
+        seekTo,
+        setSeekTo: setSeekToValue,
+        seekToValue
       }}
     >
       {children}

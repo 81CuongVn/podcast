@@ -23,6 +23,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Turntable } from './turntable'
+import { LikeButton } from './like-button'
 import { cn } from '@/lib/utils'
 
 export function GlobalPlayer() {
@@ -36,12 +37,16 @@ export function GlobalPlayer() {
     isLoop,
     setIsLoop,
     isShuffle,
-    setIsShuffle
+    setIsShuffle,
+    currentTime,
+    setCurrentTime,
+    duration,
+    setDuration,
+    seekToValue,
+    setSeekTo
   } = usePlayer()
   
   const audioRef = useRef<HTMLAudioElement>(null)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
@@ -55,6 +60,14 @@ export function GlobalPlayer() {
       setIsPlaying(true)
     }
   }, [currentEpisode, isYouTube, setIsPlaying])
+
+  // Sync seekTo requests from other components
+  useEffect(() => {
+    if (seekToValue !== null && audioRef.current) {
+      audioRef.current.currentTime = seekToValue
+      setSeekTo(null) // Reset seek request
+    }
+  }, [seekToValue, setSeekTo])
 
   const togglePlayPause = () => {
     if (audioRef.current) {
@@ -231,14 +244,12 @@ export function GlobalPlayer() {
                   {currentEpisode.podcast?.title || 'Playing now'}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsLiked(!isLiked)}
-                className={cn("h-8 w-8 rounded-full ml-2", isLiked && "text-rose-500")}
-              >
-                <Heart className={cn("h-5 w-5", isLiked && "fill-current")} />
-              </Button>
+              <LikeButton 
+                episodeId={currentEpisode.id} 
+                showCount={false} 
+                size="sm" 
+                className="h-8 w-8 p-0 bg-transparent border-none hover:bg-muted"
+              />
             </div>
 
             {/* Main Controls (Compact) */}

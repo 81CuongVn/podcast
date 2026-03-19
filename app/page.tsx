@@ -92,7 +92,7 @@ export default async function HomePage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative overflow-hidden pt-20 pb-32 md:pt-32 md:pb-48">
+        <section className="relative overflow-hidden pt-20 pb-32 md:pt-40 md:pb-48">
           <SwirlingVoiceBackground />
           {/* Animated Background Gradients */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden">
@@ -119,6 +119,43 @@ export default async function HomePage() {
                 profile={profile} 
                 latestEpisode={recentEpisodes.length > 0 ? recentEpisodes[0] : null} 
               />
+            </div>
+          </div>
+        </section>
+
+        {/* Categories Section - NEW */}
+        <section className="py-24 relative overflow-hidden">
+          <div className="container mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
+              <div className="space-y-2">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Explore by topic</span>
+                <h2 className="text-5xl font-black tracking-tighter">Popular <span className="text-primary italic font-serif">Categories</span></h2>
+              </div>
+              <Button variant="ghost" className="font-black uppercase tracking-widest text-xs hover:text-primary">
+                All Categories →
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              {[
+                { name: 'Technology', icon: '💻', color: 'bg-blue-500', count: 124 },
+                { name: 'Business', icon: '📈', color: 'bg-emerald-500', count: 89 },
+                { name: 'Health', icon: '🧘', color: 'bg-rose-500', count: 56 },
+                { name: 'Music', icon: '🎵', color: 'bg-purple-500', count: 210 },
+                { name: 'Science', icon: '🔬', color: 'bg-amber-500', count: 45 },
+                { name: 'Education', icon: '🎓', color: 'bg-indigo-500', count: 112 },
+              ].map((cat) => (
+                <Link key={cat.name} href={`/categories/${cat.name.toLowerCase()}`} className="group">
+                  <div className="relative p-8 rounded-[2.5rem] bg-card border border-border/50 shadow-xl shadow-muted/20 transition-all duration-500 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden h-full">
+                    <div className={cn("absolute top-0 left-0 w-2 h-full", cat.color)} />
+                    <div className={cn("mb-6 h-16 w-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 bg-muted/50")}>
+                      {cat.icon}
+                    </div>
+                    <h3 className="font-black text-lg mb-1">{cat.name}</h3>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">{cat.count} Shows</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </section>

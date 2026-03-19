@@ -30,11 +30,13 @@ export function WaveformPlayer({
 }: WaveformPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const wavesurfer = useRef<WaveSurfer | null>(null)
-  const { isPlaying, setIsPlaying, currentEpisode } = usePlayer()
+  const { isPlaying, setIsPlaying, currentEpisode, currentTime, duration, seekTo } = usePlayer()
   const [isReady, setIsReady] = useState(false)
 
+  const isYouTube = audioUrl?.includes('youtube.com') || audioUrl?.includes('youtu.be')
+
   const initWaveSurfer = useCallback(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current || isYouTube) return
 
     wavesurfer.current = WaveSurfer.create({
       container: containerRef.current,
@@ -45,6 +47,8 @@ export function WaveformPlayer({
       barGap,
       height,
       normalize: true,
+      muted: true, // Visual only
+      interact: true, // Allow seeking
     })
 
     wavesurfer.current.load(audioUrl)
@@ -54,28 +58,52 @@ export function WaveformPlayer({
       onReady?.()
     })
 
-    wavesurfer.current.on('play', () => setIsPlaying(true))
-    wavesurfer.current.on('pause', () => setIsPlaying(false))
-    wavesurfer.current.on('finish', () => setIsPlaying(false))
+    // Sync WaveSurfer click/seek to global player
+    wavesurfer.current.on('interaction', (newProgress) => {
+      if (wavesurfer.current) {
+        const time = newProgress * wavesurfer.current.getDuration()
+        seekTo(time)
+      }
+    })
 
     return () => {
       wavesurfer.current?.destroy()
     }
-  }, [audioUrl, waveColor, progressColor, barWidth, barGap, height, onReady, setIsPlaying])
+  }, [audioUrl, waveColor, progressColor, barWidth, barGap, height, onReady, seekTo, isYouTube])
 
   useEffect(() => {
     initWaveSurfer()
   }, [initWaveSurfer])
 
+  // Sync WaveSurfer position with global player's currentTime
   useEffect(() => {
-    if (wavesurfer.current && isReady) {
-      if (isPlaying) {
-        wavesurfer.current.play()
-      } else {
-        wavesurfer.current.pause()
-      }
+    if (wavesurfer.current && isReady && !wavesurfer.current.isPlaying()) {
+      const progress = currentTime / (duration || 1)
+      wavesurfer.current.seekTo(progress)
     }
-  }, [isPlaying, isReady])
+  }, [currentTime, duration, isReady])
+
+  if (isYouTube) {
+    return (
+      <div className={cn("relative w-full h-[80px] bg-muted/20 rounded-xl flex items-center justify-center border border-border/50 overflow-hidden", className)}>
+        <div className="flex gap-1.5 items-end h-10 opacity-30">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <motion.div
+              key={i}
+              animate={{ height: isPlaying ? [10, 40, 15, 35, 10] : 10 }}
+              transition={{ duration: 1, repeat: Infinity, delay: i * 0.1 }}
+              className="w-2 bg-primary rounded-full"
+            />
+          ))}
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/50">
+            YouTube Visualizer Active
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={cn("relative w-full group", className)}>

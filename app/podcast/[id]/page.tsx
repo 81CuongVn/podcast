@@ -10,6 +10,7 @@ import { FollowButton } from '@/components/follow-button'
 import Image from 'next/image'
 import { Music, Users, Share2, Play, Heart, MessageSquare, Repeat, ListMusic, Pause, Link as LinkMusic } from 'lucide-react'
 import { WaveformPlayer } from '@/components/podcast/waveform-player'
+import { LikeButton } from '@/components/podcast/like-button'
 import { usePlayer } from '@/lib/player-context'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
@@ -26,6 +27,15 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
   const [user, setUser] = useState<any>(null)
   const { setCurrentEpisode, isPlaying, setIsPlaying, currentEpisode } = usePlayer()
   const supabase = createClient()
+
+  // Stats state to prevent numbers changing on re-render
+  const [stats, setStats] = useState({
+    plays: 0,
+    likes: 0,
+    followers: '0',
+    trackPlays: {} as Record<string, number>,
+    trackComments: {} as Record<string, number>
+  })
 
   useEffect(() => {
     const loadData = async () => {
@@ -46,6 +56,14 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
 
       if (podcastData) {
         setPodcast(podcastData)
+        // Initialize stable stats
+        setStats({
+          plays: Math.floor(Math.random() * 10000) + 1000,
+          likes: Math.floor(Math.random() * 500) + 50,
+          followers: (Math.random() * 5 + 1).toFixed(1) + 'K',
+          trackPlays: {},
+          trackComments: {}
+        })
       }
 
       // Fetch episodes
@@ -57,6 +75,15 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
 
       if (episodesData) {
         setEpisodes(episodesData)
+        
+        // Initialize stable stats for each episode
+        const trackPlays: Record<string, number> = {}
+        const trackComments: Record<string, number> = {}
+        episodesData.forEach(ep => {
+          trackPlays[ep.id] = Math.floor(Math.random() * 1000) + 100
+          trackComments[ep.id] = Math.floor(Math.random() * 50) + 5
+        })
+        setStats(prev => ({ ...prev, trackPlays, trackComments }))
       }
 
       // Check if subscribed
@@ -208,9 +235,7 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
       <div className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-30">
         <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="font-bold border-border/50">
-              <Heart className="h-4 w-4 mr-2" /> Like
-            </Button>
+            <LikeButton podcastId={podcast.id} initialCount={stats.likes} />
             <Button variant="outline" size="sm" className="font-bold border-border/50">
               <Repeat className="h-4 w-4 mr-2" /> Repost
             </Button>
@@ -223,10 +248,7 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
           </div>
           <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground">
             <div className="flex items-center gap-1.5">
-              <Play className="h-4 w-4" /> {Math.floor(Math.random() * 10000)}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Heart className="h-4 w-4" /> {Math.floor(Math.random() * 500)}
+              <Play className="h-4 w-4" /> {stats.plays}
             </div>
           </div>
         </div>
@@ -285,11 +307,14 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
                     </div>
                     <div className="flex items-center gap-4 text-xs font-bold text-muted-foreground/60">
                       <div className="flex items-center gap-1">
-                        <Play className="h-3 w-3" /> {Math.floor(Math.random() * 1000)}
+                        <Play className="h-3 w-3" /> {stats.trackPlays[episode.id] || 0}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <MessageSquare className="h-3 w-3" /> {Math.floor(Math.random() * 50)}
-                      </div>
+                      <LikeButton 
+                        episodeId={episode.id} 
+                        showCount={true} 
+                        size="sm" 
+                        className="h-6 px-2 text-[10px] bg-transparent border-none hover:bg-muted"
+                      />
                     </div>
                   </div>
                 ))}
@@ -326,7 +351,7 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
                 <div className="grid grid-cols-2 gap-4 w-full mb-6">
                   <div className="text-center">
                     <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Followers</p>
-                    <p className="text-xl font-black">4.5K</p>
+                    <p className="text-xl font-black">{stats.followers}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Tracks</p>

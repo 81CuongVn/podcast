@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
-import { Upload, Trash2, Play, Youtube, Link as LinkIcon } from 'lucide-react'
+import { Upload, Trash2, Play, Youtube, Link as LinkIcon, Music, Pause } from 'lucide-react'
+import { usePlayer } from '@/lib/player-context'
 
 type MediaType = 'audio' | 'video' | 'document' | 'transcript'
 
@@ -25,6 +26,19 @@ export default function EpisodesPage({ params }: EpisodesPageProps) {
   const [uploadMethod, setUploadMethod] = useState<'file' | 'url'>('file')
   const [videoUrl, setVideoUrl] = useState('')
   const supabase = createClient()
+  const { setCurrentEpisode, isPlaying, setIsPlaying, currentEpisode, setIsPlayerVisible } = usePlayer()
+
+  const handlePlayEpisode = (episode: any) => {
+    if (currentEpisode?.id === episode.id) {
+      setIsPlaying(!isPlaying)
+    } else {
+      setCurrentEpisode({
+        ...episode,
+        podcast: podcast
+      })
+      setIsPlayerVisible(true)
+    }
+  }
 
   useEffect(() => {
     const loadData = async () => {
@@ -380,22 +394,27 @@ export default function EpisodesPage({ params }: EpisodesPageProps) {
           
           {episodes.length > 0 && (
             <div className="mb-6">
-              <h3 className="mb-3 text-sm font-medium text-muted-foreground">Preview Player</h3>
+              <h3 className="mb-3 text-sm font-medium text-muted-foreground">Quick Preview</h3>
               <Card className="p-4 mb-4">
                 {selectedEpisode ? (
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-semibold">{selectedEpisode.title}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">{selectedEpisode.description}</p>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold truncate">{selectedEpisode.title}</h4>
+                      <p className="text-xs text-muted-foreground truncate">{selectedEpisode.description || 'No description'}</p>
                     </div>
-                    <audio
-                      src={selectedEpisode.audio_url || selectedEpisode.media_url}
-                      controls
-                      className="w-full"
-                    />
+                    <Button 
+                      onClick={() => handlePlayEpisode(selectedEpisode)}
+                      className="rounded-full h-12 w-12 flex-shrink-0"
+                    >
+                      {isPlaying && currentEpisode?.id === selectedEpisode.id ? (
+                        <Pause className="h-5 w-5" />
+                      ) : (
+                        <Play className="h-5 w-5 ml-0.5" />
+                      )}
+                    </Button>
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground text-sm">Select an episode to preview</p>
+                  <p className="text-center text-muted-foreground text-sm">Select an episode below to preview in the global player</p>
                 )}
               </Card>
             </div>
