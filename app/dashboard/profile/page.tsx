@@ -16,7 +16,8 @@ import {
   MapPin, 
   Globe, 
   Camera,
-  AtSign
+  AtSign,
+  Upload
 } from 'lucide-react'
 import Image from 'next/image'
 
@@ -28,10 +29,13 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('')
   const [websiteUrl, setWebsiteUrl] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
+  const [coverUrl, setCoverUrl] = useState('')
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('')
   const [saving, setSaving] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -52,6 +56,7 @@ export default function ProfilePage() {
           setBio(data.bio || '')
           setWebsiteUrl(data.website_url || '')
           setAvatarUrl(data.avatar_url || '')
+          setCoverUrl(data.cover_url || '')
           setAddress(data.address || '')
           setCity(data.city || '')
           setCountry(data.country || '')
@@ -62,6 +67,42 @@ export default function ProfilePage() {
 
     fetchProfile()
   }, [])
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (type === 'avatar') setUploadingAvatar(true)
+    else setUploadingCover(true)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const fileExt = file.name.split('.').pop()
+      const filePath = `${user.id}/${type}-${Math.random()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('podcast-media')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('podcast-media')
+        .getPublicUrl(filePath)
+
+      if (type === 'avatar') setAvatarUrl(publicUrl)
+      else setCoverUrl(publicUrl)
+
+      toast.success(`${type === 'avatar' ? 'Avatar' : 'Cover'} uploaded! Remember to save changes.`)
+    } catch (error: any) {
+      toast.error(error.message || 'Upload failed')
+    } finally {
+      if (type === 'avatar') setUploadingAvatar(false)
+      else setUploadingCover(false)
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -78,6 +119,7 @@ export default function ProfilePage() {
             bio: bio,
             website_url: websiteUrl,
             avatar_url: avatarUrl,
+            cover_url: coverUrl,
             address: address,
             city: city,
             country: country,
@@ -104,143 +146,161 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header */}
-      <div className="relative h-48 rounded-[2.5rem] bg-gradient-to-r from-primary to-accent overflow-hidden shadow-2xl shadow-primary/20">
-        <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]" />
-        <div className="absolute -bottom-12 left-10 flex items-end gap-6">
-          <div className="relative group">
-            <div className="relative h-32 w-32 rounded-3xl overflow-hidden border-4 border-background bg-muted shadow-xl">
+    <div className="max-w-6xl mx-auto space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header / Cover Section */}
+      <div className="relative h-64 rounded-[2.5rem] bg-muted overflow-hidden shadow-2xl group">
+        {coverUrl ? (
+          <Image src={coverUrl} alt="Cover" fill className="object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent" />
+        )}
+        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <label className="cursor-pointer bg-white/20 backdrop-blur-md px-6 py-2 rounded-full text-white font-bold flex items-center gap-2 hover:bg-white/30 transition-all">
+            <Camera className="h-5 w-5" />
+            {uploadingCover ? 'Uploading...' : 'Change Cover'}
+            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'cover')} disabled={uploadingCover} />
+          </label>
+        </div>
+
+        <div className="absolute -bottom-16 left-10 flex items-end gap-6">
+          <div className="relative group/avatar">
+            <div className="relative h-40 w-40 rounded-[2.5rem] overflow-hidden border-8 border-background bg-muted shadow-2xl">
               {avatarUrl ? (
                 <Image src={avatarUrl} alt={displayName} fill className="object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-muted">
-                  <User className="h-12 w-12 text-muted-foreground" />
+                  <User className="h-16 w-16 text-muted-foreground" />
+                </div>
+              )}
+              {uploadingAvatar && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
                 </div>
               )}
             </div>
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl cursor-pointer">
+            <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-[2.5rem] cursor-pointer">
               <Camera className="h-8 w-8 text-white" />
-            </div>
+              <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'avatar')} disabled={uploadingAvatar} />
+            </label>
           </div>
-          <div className="mb-14">
-            <h1 className="text-3xl font-black text-white drop-shadow-md">{displayName || profile?.username}</h1>
-            <p className="text-white/80 font-bold flex items-center gap-1.5">
+          <div className="mb-20">
+            <h1 className="text-4xl font-black text-white drop-shadow-lg">{displayName || profile?.username}</h1>
+            <p className="text-white/90 font-bold flex items-center gap-1.5 bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full w-fit mt-2">
               <AtSign className="h-4 w-4" /> {profile?.username}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-16">
         {/* Sidebar Info */}
-        <div className="space-y-6">
-          <Card className="p-6 rounded-[2rem] border-none shadow-xl shadow-muted/50 bg-card">
-            <h3 className="font-black text-lg mb-4">Profile Stats</h3>
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="p-6 rounded-[2rem] border-none shadow-xl shadow-muted/50 bg-card/50 backdrop-blur-md">
+            <h3 className="font-black text-lg mb-4">Account Status</h3>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-sm font-bold">Member Since</span>
+              <div className="flex flex-col gap-1 p-4 rounded-xl bg-muted/30">
+                <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Joined On</span>
                 <span className="font-bold text-sm">{new Date(profile?.created_at).toLocaleDateString()}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-sm font-bold">Account Status</span>
-                <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase">Active</span>
+              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30">
+                <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Status</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-black uppercase tracking-tighter shadow-lg shadow-emerald-500/20">Active</span>
               </div>
             </div>
+          </Card>
+
+          <Card className="p-6 rounded-[2rem] border-none shadow-xl shadow-muted/50 bg-primary text-primary-foreground overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700" />
+            <h3 className="font-black text-lg mb-2 relative z-10">Pro Creator</h3>
+            <p className="text-primary-foreground/80 text-xs font-medium mb-4 relative z-10 leading-relaxed">
+              Unlock advanced metrics and unlimited storage.
+            </p>
+            <Button variant="secondary" size="sm" className="w-full rounded-xl font-black relative z-10 h-10 shadow-lg text-xs">
+              Upgrade Now
+            </Button>
           </Card>
         </div>
 
         {/* Main Form */}
-        <div className="md:col-span-2 space-y-8">
-          <Card className="p-8 rounded-[2.5rem] border-none shadow-xl shadow-muted/50 bg-card">
+        <div className="lg:col-span-3 space-y-8">
+          <Card className="p-8 rounded-[2.5rem] border-none shadow-2xl shadow-muted/50 bg-card">
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-black text-muted-foreground flex items-center gap-2">
-                    <User className="h-4 w-4" /> Public Name
+                <div className="space-y-2.5">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                    <User className="h-3 w-3 text-primary" /> Public Name
                   </label>
                   <Input
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Enter your display name"
-                    className="rounded-xl h-12 bg-muted/50 border-none font-semibold focus-visible:ring-primary"
+                    placeholder="Display name"
+                    className="rounded-xl h-12 bg-muted/50 border-none font-bold text-base px-5 focus-visible:ring-primary shadow-inner"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-black text-muted-foreground flex items-center gap-2">
-                    <Camera className="h-4 w-4" /> Avatar URL
+                <div className="space-y-2.5">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                    <Globe className="h-3 w-3 text-primary" /> Website
                   </label>
-                  <Input
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    placeholder="https://example.com/avatar.jpg"
-                    className="rounded-xl h-12 bg-muted/50 border-none font-semibold focus-visible:ring-primary"
-                  />
+                  <div className="relative">
+                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      value={websiteUrl}
+                      onChange={(e) => setWebsiteUrl(e.target.value)}
+                      placeholder="yoursite.com"
+                      className="rounded-xl h-12 pl-11 bg-muted/50 border-none font-bold text-base focus-visible:ring-primary shadow-inner"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-black text-muted-foreground flex items-center gap-2">
-                  <AtSign className="h-4 w-4" /> Bio
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                  <AtSign className="h-3 w-3 text-primary" /> Bio
                 </label>
                 <Textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell the world about your journey..."
-                  rows={4}
-                  className="rounded-2xl bg-muted/50 border-none font-semibold focus-visible:ring-primary resize-none"
+                  placeholder="Tell your listeners about yourself..."
+                  rows={3}
+                  className="rounded-2xl bg-muted/50 border-none font-bold text-base p-5 focus-visible:ring-primary resize-none shadow-inner leading-relaxed"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-black text-muted-foreground flex items-center gap-2">
-                  <Globe className="h-4 w-4" /> Website
-                </label>
-                <div className="relative">
-                  <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    value={websiteUrl}
-                    onChange={(e) => setWebsiteUrl(e.target.value)}
-                    placeholder="https://yourwebsite.com"
-                    type="url"
-                    className="rounded-xl h-12 pl-12 bg-muted/50 border-none font-semibold focus-visible:ring-primary"
-                  />
+              <div className="pt-8 border-t border-border/50">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-sm">
+                    <MapPin className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-black text-xl tracking-tight">Location Details</h3>
                 </div>
-              </div>
-
-              <div className="pt-4 border-t border-border/50">
-                <h3 className="font-black text-lg mb-6 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" /> Location Information
-                </h3>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-black text-muted-foreground">Street Address</label>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2 space-y-2.5">
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Street Address</label>
                     <Input
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      placeholder="123 Podcast Ave"
-                      className="rounded-xl h-12 bg-muted/50 border-none font-semibold"
+                      placeholder="Street address"
+                      className="rounded-xl h-12 bg-muted/50 border-none font-bold text-base px-5 shadow-inner"
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-sm font-black text-muted-foreground">City</label>
-                      <Input
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        placeholder="Los Angeles"
-                        className="rounded-xl h-12 bg-muted/50 border-none font-semibold"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-black text-muted-foreground">Country</label>
-                      <Input
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        placeholder="United States"
-                        className="rounded-xl h-12 bg-muted/50 border-none font-semibold"
-                      />
-                    </div>
+                  <div className="space-y-2.5">
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">City</label>
+                    <Input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="e.g. New York"
+                      className="rounded-xl h-12 bg-muted/50 border-none font-bold text-base px-5 shadow-inner"
+                    />
+                  </div>
+                  <div className="space-y-2.5">
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Country</label>
+                    <Input
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      placeholder="e.g. USA"
+                      className="rounded-xl h-12 bg-muted/50 border-none font-bold text-base px-5 shadow-inner"
+                    />
                   </div>
                 </div>
               </div>
@@ -250,14 +310,14 @@ export default function ProfilePage() {
                   onClick={handleSave} 
                   disabled={saving}
                   size="lg"
-                  className="rounded-full px-12 h-14 font-black text-lg shadow-2xl shadow-primary/30 transition-all hover:scale-105"
+                  className="rounded-full px-12 h-14 font-black text-lg shadow-xl shadow-primary/30 transition-all hover:scale-105 active:scale-95"
                 >
                   {saving ? (
                     <span className="flex items-center gap-2">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                       Saving...
                     </span>
-                  ) : 'Update Profile'}
+                  ) : 'Save Changes'}
                 </Button>
               </div>
             </div>
