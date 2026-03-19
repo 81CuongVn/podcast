@@ -63,10 +63,10 @@ export default async function DashboardPage() {
               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               Creator Studio
             </div>
-            <h1 className="text-5xl md:text-6xl font-black tracking-tighter">Your <span className="text-primary italic font-serif">Podcasts</span></h1>
-            <p className="text-muted-foreground font-medium text-lg opacity-70">Manage your shows and track performance.</p>
+            <h1 className="text-6xl md:text-7xl font-black tracking-tighter">Your <span className="text-primary italic font-serif">Podcasts</span></h1>
+            <p className="text-muted-foreground font-medium text-xl opacity-70">Manage your shows and track performance.</p>
           </div>
-          <Button asChild size="lg" className="rounded-full h-14 px-10 font-black uppercase tracking-widest text-xs shadow-2xl shadow-primary/30 transition-all hover:scale-105 active:scale-95">
+          <Button asChild size="lg" className="rounded-full h-16 px-12 font-black uppercase tracking-widest text-xs shadow-2xl shadow-primary/30 transition-all hover:scale-105 active:scale-95">
             <Link href="/dashboard/podcast/new">
               <Plus className="h-5 w-5 mr-2" />
               New Podcast
@@ -75,27 +75,27 @@ export default async function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {[
             { label: 'Total Shows', value: podcasts.length, icon: Radio, color: 'text-blue-500' },
             { label: 'Listeners', value: '12.4K', icon: Users, color: 'text-emerald-500' },
             { label: 'Total Time', value: '142h', icon: Play, color: 'text-amber-500' },
             { label: 'Growth', value: '+12%', icon: BarChart3, color: 'text-purple-500' },
           ].map((stat) => (
-            <Card key={stat.label} className="p-6 rounded-[2rem] border-none shadow-xl shadow-muted/20 bg-card/40 backdrop-blur-md flex items-center gap-4 group hover:bg-card/60 transition-colors">
-              <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+            <Card key={stat.label} className="p-8 rounded-[2.5rem] border-none shadow-2xl shadow-muted/20 bg-card/40 backdrop-blur-md flex items-center gap-6 group hover:bg-card/60 transition-all">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <stat.icon className={`h-7 w-7 ${stat.color}`} />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">{stat.label}</p>
-                <p className="text-2xl font-black">{stat.value}</p>
+                <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground opacity-60">{stat.label}</p>
+                <p className="text-3xl font-black">{stat.value}</p>
               </div>
             </Card>
           ))}
         </div>
 
         {podcasts.length > 0 ? (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
             {podcasts.map((podcast: any) => (
               <Card
                 key={podcast.id}

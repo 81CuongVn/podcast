@@ -64,8 +64,11 @@ export function WaveformPlayer({
     // Sync WaveSurfer click/seek to global player
     wavesurfer.current.on('interaction', (newProgress) => {
       if (wavesurfer.current) {
-        const time = newProgress * wavesurfer.current.getDuration()
-        seekTo(time)
+        // Use requestAnimationFrame to ensure smooth sync without jumping
+        requestAnimationFrame(() => {
+          const time = newProgress * wavesurfer.current!.getDuration()
+          seekTo(time)
+        })
       }
     })
 

@@ -119,7 +119,7 @@ export default function ProfilePage() {
             bio: bio,
             website_url: websiteUrl,
             avatar_url: avatarUrl,
-            cover_url: coverUrl,
+            cover_url: coverUrl, // This was already here, but let's re-verify the table schema if it fails
             address: address,
             city: city,
             country: country,
