@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Play, Pause, Download, Share2 } from 'lucide-react'
 import type { Episode } from '@/lib/types'
 import { usePlayer } from '@/lib/player-context'
@@ -30,7 +31,7 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
     try {
       const date = new Date(dateString)
       if (isNaN(date.getTime())) return 'Recently'
-      return date.toLocaleDateString()
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     } catch (e) {
       return 'Recently'
     }
@@ -39,16 +40,10 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
-    // Check if the pathname is an external URL (YouTube/Vimeo)
-    const isExternal = episode.audio_pathname?.startsWith('http://') || episode.audio_pathname?.startsWith('https://')
-    
-    // Only proxy via API if it's an internal Supabase Storage path
+    // Ensure media_url points to our local API for consistent streaming/inline display
     const playableEpisode = {
       ...episode,
-      media_url: isExternal 
-        ? (episode.media_url || episode.audio_url) 
-        : `/api/download-audio?path=${encodeURIComponent(episode.audio_pathname || '')}`
+      media_url: `/api/download-audio?path=${encodeURIComponent(episode.audio_pathname || '')}`
     }
     setCurrentEpisode(playableEpisode as any)
     setIsPlayerVisible(true)
@@ -59,7 +54,7 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
     e.stopPropagation()
     const url = episode.media_url || episode.audio_url
     if (url) {
-      window.open(`/api/download-audio?path=${encodeURIComponent(episode.audio_pathname)}`, '_blank')
+      window.open(`/api/download-audio?path=${encodeURIComponent(episode.audio_pathname || '')}`, '_blank')
     }
   }
 
@@ -72,86 +67,99 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
   }
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-4">
+    <Card className="hover:shadow-2xl transition-all duration-500 group relative overflow-hidden border-none bg-card/50 backdrop-blur-sm hover:-translate-y-2">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      <CardHeader className="pb-4 relative z-10">
+        <div className="flex flex-col gap-4">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl shadow-lg">
+            {episode.podcasts?.cover_image_url ? (
+              <Image 
+                src={episode.podcasts.cover_image_url} 
+                alt={episode.title} 
+                fill 
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+                <Play className="h-12 w-12 text-primary/40" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Button
+                size="icon"
+                onClick={handlePlay}
+                className={`rounded-full h-16 w-16 shadow-2xl transition-all duration-500 hover:scale-110 ${
+                  isPlaying ? 'bg-primary text-primary-foreground' : 'bg-white text-black hover:bg-primary hover:text-primary-foreground'
+                }`}
+              >
+                {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
+              </Button>
+            </div>
+          </div>
+
           <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">
+              {formatDate(episode.published_at || episode.created_at)}
+            </p>
             <Link href={`/podcast/${episode.podcast_id}`} className="hover:text-primary transition-colors">
-              <CardTitle className="line-clamp-2 text-lg leading-tight group-hover:text-primary transition-colors">
+              <CardTitle className="line-clamp-1 text-xl font-black leading-tight group-hover:text-primary transition-colors">
                 {episode.title}
               </CardTitle>
             </Link>
             {showPodcast && episode.podcasts && (
-              <CardDescription className="mt-1 font-medium flex items-center gap-1.5">
-                <span className="h-1 w-1 rounded-full bg-primary" />
+              <CardDescription className="mt-1 font-bold text-sm text-muted-foreground/80">
                 {episode.podcasts.title}
               </CardDescription>
             )}
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleShare}
-              className="rounded-full h-10 w-10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              title="Share"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleDownload}
-              className="rounded-full h-10 w-10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              title="Download"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              onClick={handlePlay}
-              className={`rounded-full h-12 w-12 shrink-0 shadow-lg transition-all duration-300 hover:scale-110 ${
-                isPlaying ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground'
-              }`}
-            >
-              {isPlaying ? (
-                <Pause className="h-6 w-6" />
-              ) : (
-                <Play className="h-6 w-6 ml-0.5" />
-              )}
-            </Button>
-          </div>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 relative z-10">
         {episode.description && (
-          <p className="line-clamp-2 text-sm text-muted-foreground leading-relaxed">
+          <p className="line-clamp-2 text-sm text-muted-foreground leading-relaxed font-medium">
             {episode.description}
           </p>
         )}
         
-        <div className="flex items-center justify-between text-xs font-medium text-muted-foreground border-t border-border/50 pt-4">
-          <div className="flex items-center gap-3">
-            <span>{formatDate(episode.published_at || episode.created_at)}</span>
+        <div className="flex items-center justify-between pt-4 border-t border-border/50">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePlay}
+              className="rounded-full font-black text-xs h-8 px-4 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+            >
+              {isPlaying ? 'PAUSE' : 'LISTEN'}
+            </Button>
             {episode.duration && (
-              <span className="flex items-center gap-1.5">
-                <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
-                {formatDuration(episode.duration)}
+              <span className="text-[10px] font-black text-muted-foreground">
+                {formatDuration(episode.duration)} MIN
               </span>
             )}
           </div>
           
-          <Link 
-            href={`/podcast/${episode.podcast_id}`} 
-            className="text-primary hover:underline font-bold"
-          >
-            Details →
-          </Link>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleShare}
+              className="rounded-full h-8 w-8 text-muted-foreground hover:text-primary"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDownload}
+              className="rounded-full h-8 w-8 text-muted-foreground hover:text-primary"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
   )
-}
 

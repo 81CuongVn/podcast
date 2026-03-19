@@ -4,6 +4,10 @@ export type Profile = {
   bio: string | null
   avatar_url: string | null
   website: string | null
+  address: string | null
+  city: string | null
+  country: string | null
+  is_admin?: boolean
   created_at: string
   updated_at: string
 }

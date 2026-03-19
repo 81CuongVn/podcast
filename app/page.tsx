@@ -86,7 +86,7 @@ export default async function HomePage() {
   ])
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background selection:bg-primary selection:text-primary-foreground">
       <Header />
 
       <main className="flex-1">
@@ -94,21 +94,23 @@ export default async function HomePage() {
         <section className="relative overflow-hidden pt-20 pb-32 md:pt-32 md:pb-48">
           {/* Animated Background Gradients */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden">
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px] animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent/20 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/20 blur-[140px] animate-pulse" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-accent/20 blur-[140px] animate-pulse" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-500/10 blur-[100px] animate-bounce duration-[10s]" />
           </div>
 
-          <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-4xl text-center">
-              <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-primary/10 px-6 py-2 text-sm font-bold text-primary shadow-sm border border-primary/20 backdrop-blur-sm">
-                <Headphones className="h-4 w-4" />
+          <div className="container mx-auto px-4 relative">
+            <div className="mx-auto max-w-5xl text-center">
+              <div className="mb-10 inline-flex items-center gap-3 rounded-full bg-white/50 backdrop-blur-md px-6 py-2 text-xs font-black text-primary shadow-xl border border-primary/10 uppercase tracking-[0.2em]">
+                <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
                 Trusted by 10,000+ Creators
               </div>
-              <h1 className="mb-8 text-5xl font-extrabold tracking-tight text-balance md:text-8xl lg:leading-[1.1]">
-                Your Voice, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Amplified</span>
+              <h1 className="mb-10 text-6xl font-black tracking-tight text-balance md:text-9xl lg:leading-[0.95]">
+                Your Voice, <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-accent animate-gradient-x">Amplified</span>
               </h1>
-              <p className="mb-12 text-xl text-muted-foreground text-balance md:text-2xl max-w-2xl mx-auto leading-relaxed">
-                The all-in-one platform to record, distribute, and monetize your podcast. Professional tools for modern storytellers.
+              <p className="mb-14 text-xl text-muted-foreground text-balance md:text-3xl max-w-3xl mx-auto leading-tight font-medium opacity-80">
+                The professional all-in-one platform to record, distribute, and monetize your stories.
               </p>
 
               <HeroButtons 
@@ -120,42 +122,45 @@ export default async function HomePage() {
         </section>
 
         {/* Dynamic Grid Section */}
-        <section className="py-24 relative overflow-hidden">
+        <section className="py-32 relative overflow-hidden bg-white/30 backdrop-blur-sm">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-start">
               {/* Sidebar Info - Modern Layout */}
-              <div className="lg:col-span-4 space-y-12">
-                <div>
-                  <h2 className="text-4xl font-bold mb-6">Built for the <span className="text-primary">Creator Economy</span></h2>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    We provide the infrastructure so you can focus on what matters: your content.
+              <div className="lg:col-span-4 space-y-16">
+                <div className="space-y-6">
+                  <h2 className="text-5xl font-black leading-tight tracking-tighter">Built for the <span className="text-primary underline decoration-wavy decoration-accent/30 underline-offset-8">Creator Economy</span></h2>
+                  <p className="text-xl text-muted-foreground font-medium leading-relaxed opacity-70">
+                    We provide the professional infrastructure so you can focus on what truly matters: your unique content.
                   </p>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="group p-6 rounded-2xl bg-card border border-border transition-all hover:border-primary/50 hover:shadow-xl hover:-translate-y-1">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Zap className="h-7 w-7" />
+                <div className="space-y-8">
+                  <div className="group p-8 rounded-[2.5rem] bg-card border-none shadow-xl shadow-muted/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 group-hover:rotate-6">
+                      <Zap className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">Instant Publishing</h3>
-                    <p className="text-muted-foreground">Distribute to all major platforms with one click.</p>
+                    <h3 className="text-2xl font-black mb-3">Instant Publishing</h3>
+                    <p className="text-muted-foreground font-medium opacity-70 leading-relaxed text-sm">Distribute to all major platforms with a single click of a button.</p>
                   </div>
 
-                  <div className="group p-6 rounded-2xl bg-card border border-border transition-all hover:border-primary/50 hover:shadow-xl hover:-translate-y-1">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 mb-4 group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
-                      <Users className="h-7 w-7" />
+                  <div className="group p-8 rounded-[2.5rem] bg-card border-none shadow-xl shadow-muted/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10 mb-6 group-hover:bg-accent group-hover:text-accent-foreground transition-all duration-500 group-hover:-rotate-6">
+                      <Users className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">Listener Engagement</h3>
-                    <p className="text-muted-foreground">Deep insights into how your audience listens.</p>
+                    <h3 className="text-2xl font-black mb-3">Listener Engagement</h3>
+                    <p className="text-muted-foreground font-medium opacity-70 leading-relaxed text-sm">Deep insights into how your audience listens and where they come from.</p>
                   </div>
                 </div>
               </div>
 
               {/* Main Content Area */}
               <div className="lg:col-span-8">
-                <div className="mb-10 flex items-center justify-between">
-                  <h2 className="text-3xl font-bold tracking-tight">Trending Now</h2>
-                  <Button variant="link" asChild className="text-primary font-bold">
+                <div className="mb-12 flex items-end justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Curated Picks</span>
+                    <h2 className="text-4xl font-black tracking-tight">Trending <span className="italic font-serif">Now</span></h2>
+                  </div>
+                  <Button variant="link" asChild className="text-primary font-black uppercase text-xs tracking-widest p-0 h-auto">
                     <Link href="/browse?sort=popular">View All Podcasts →</Link>
                   </Button>
                 </div>
@@ -163,11 +168,11 @@ export default async function HomePage() {
                 {podcasts.length > 0 ? (
                   <PodcastGrid podcasts={podcasts.slice(0, 6)} />
                 ) : (
-                  <div className="rounded-3xl border-2 border-dashed border-border p-20 text-center bg-muted/20">
-                    <Headphones className="mb-6 h-16 w-16 text-muted-foreground/30 mx-auto" />
-                    <p className="text-xl font-medium text-muted-foreground mb-6">Start your journey today.</p>
+                  <div className="rounded-[3rem] border-none p-24 text-center bg-card shadow-2xl shadow-muted/50">
+                    <Headphones className="mb-8 h-20 w-20 text-primary/20 mx-auto animate-bounce" />
+                    <p className="text-2xl font-black text-foreground mb-8">Start your creative journey today.</p>
                     {profile && (
-                      <Button asChild size="lg" className="rounded-full px-10">
+                      <Button asChild size="lg" className="rounded-full px-12 h-14 font-black shadow-2xl shadow-primary/30">
                         <Link href="/dashboard/create">Launch Your Podcast</Link>
                       </Button>
                     )}
@@ -180,25 +185,28 @@ export default async function HomePage() {
 
         {/* Recent Episodes Section - Immediate Playback */}
         {recentEpisodes.length > 0 && (
-          <section className="py-24 bg-muted/30 relative overflow-hidden">
+          <section className="py-32 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10" />
+            
             <div className="container mx-auto px-4">
-              <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
                 <div className="max-w-2xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm border border-primary/10">
                     <Flame className="h-3 w-3" />
-                    FRESH CONTENT
+                    Fresh Content
                   </div>
-                  <h2 className="text-4xl font-black tracking-tight">Listen Now</h2>
-                  <p className="mt-4 text-lg text-muted-foreground">
-                    Click play to start listening to the latest episodes right here. No redirection needed.
+                  <h2 className="text-5xl md:text-6xl font-black tracking-tight leading-[1.1]">Listen <span className="text-primary">Now</span></h2>
+                  <p className="mt-6 text-xl text-muted-foreground font-medium leading-relaxed">
+                    Dive into the latest stories, interviews, and insights from our community of professional creators.
                   </p>
                 </div>
-                <Button variant="outline" asChild className="rounded-full font-bold border-2">
+                <Button variant="outline" asChild className="rounded-full font-black text-sm h-14 px-10 border-2 hover:bg-primary hover:text-primary-foreground transition-all">
                   <Link href="/browse">Explore All Episodes</Link>
                 </Button>
               </div>
 
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
                 {recentEpisodes.map((episode: any) => (
                   <EpisodeCard key={episode.id} episode={episode} />
                 ))}
@@ -207,29 +215,61 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* Featured Creators Section */}
-        <section className="py-24 bg-foreground text-background">
+        {/* Streaming Platforms Section */}
+        <section className="py-32 border-t border-border/50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4">Top Creators</h2>
-              <p className="text-muted-foreground/80 text-lg">The voices shaping the future of audio.</p>
+            <div className="text-center mb-20">
+              <h2 className="text-4xl font-black mb-6">Available Everywhere</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-medium">
+                Stream your favorite podcasts on any platform. We distribute your content to all major audio networks.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {[
+                { name: 'Apple Podcasts', color: 'bg-[#872ec4]', icon: '🎙️' },
+                { name: 'Spotify', color: 'bg-[#1db954]', icon: '🎵' },
+                { name: 'Google Podcasts', color: 'bg-[#4285f4]', icon: '📻' },
+                { name: 'Amazon Music', color: 'bg-[#00a8e1]', icon: '🎧' },
+                { name: 'Pocket Casts', color: 'bg-[#f43e37]', icon: '📱' },
+              ].map((platform) => (
+                <div 
+                  key={platform.name} 
+                  className="group p-8 rounded-[2rem] bg-card border border-border/50 flex flex-col items-center justify-center gap-4 transition-all duration-500 hover:shadow-2xl hover:border-primary/30 hover:-translate-y-2 cursor-pointer"
+                >
+                  <div className={`h-16 w-16 rounded-2xl ${platform.color} flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform`}>
+                    {platform.icon}
+                  </div>
+                  <span className="font-black text-sm text-center">{platform.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Creators Section */}
+        <section className="py-32 bg-foreground text-background">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-20">
+              <h2 className="text-5xl font-black mb-6 tracking-tighter">Top <span className="text-primary underline decoration-primary/30 underline-offset-8">Creators</span></h2>
+              <p className="text-muted-foreground/80 text-xl font-medium">The visionary voices shaping the future of digital audio.</p>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12">
               {popularCreators.map((creator: any) => (
-                <div key={creator.id} className="flex flex-col items-center text-center space-y-4 group">
-                  <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-background/10 group-hover:border-primary transition-all duration-500">
+                <div key={creator.id} className="flex flex-col items-center text-center space-y-6 group">
+                  <div className="relative h-40 w-40 rounded-full overflow-hidden border-4 border-background/10 group-hover:border-primary transition-all duration-700 group-hover:scale-105 shadow-2xl">
                     {creator.avatar_url ? (
                       <Image src={creator.avatar_url} alt={creator.display_name} fill className="object-cover" />
                     ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center text-3xl font-bold text-muted-foreground">
+                      <div className="w-full h-full bg-muted flex items-center justify-center text-4xl font-black text-muted-foreground">
                         {creator.display_name?.charAt(0)}
                       </div>
                     )}
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg">{creator.display_name}</h3>
-                    <p className="text-sm text-muted-foreground/60">@{creator.username}</p>
+                  <div className="space-y-1">
+                    <h3 className="font-black text-xl tracking-tight">{creator.display_name}</h3>
+                    <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-widest">@{creator.username}</p>
                   </div>
                 </div>
               ))}
