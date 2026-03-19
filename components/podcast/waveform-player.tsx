@@ -44,9 +44,7 @@ export function WaveformPlayer({
       barWidth,
       barGap,
       height,
-      responsive: true,
       normalize: true,
-      partialRender: true,
     })
 
     wavesurfer.current.load(audioUrl)

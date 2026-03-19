@@ -8,10 +8,11 @@ import Link from 'next/link'
 import { SubscribeButton } from '@/components/subscribe-button'
 import { FollowButton } from '@/components/follow-button'
 import Image from 'next/image'
-import { Music, Users, Share2, Play, Heart, MessageSquare, Repeat, ListMusic } from 'lucide-react'
+import { Music, Users, Share2, Play, Heart, MessageSquare, Repeat, ListMusic, Pause, Link as LinkMusic } from 'lucide-react'
 import { WaveformPlayer } from '@/components/podcast/waveform-player'
 import { usePlayer } from '@/lib/player-context'
 import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
 
 interface PodcastDetailPageProps {
   params: Promise<{ id: string }>

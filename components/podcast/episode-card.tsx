@@ -171,7 +171,7 @@ export function EpisodeCard({ episode, showPodcast = true, className }: EpisodeC
                 <Calendar className="h-3 w-3" /> {formatDate(episode.published_at || episode.created_at)}
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" /> {formatDuration(episode.duration_seconds || (episode as any).duration)}
+                <Clock className="h-3 w-3" /> {formatDuration(episode.duration)}
               </span>
             </div>
             <div className="flex items-center gap-2">
