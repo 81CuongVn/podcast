@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { AdvancedMediaPlayer } from '@/components/advanced-media-player'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Play, Edit2, Trash2 } from 'lucide-react'
+import { Play, Edit2, Trash2, Music, Pause } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { usePlayer } from '@/lib/player-context'
 
 export default function PodcastPage() {
   const params = useParams()
@@ -19,6 +20,19 @@ export default function PodcastPage() {
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
   const supabase = createClient()
+  const { setCurrentEpisode, isPlaying, setIsPlaying, currentEpisode, setIsPlayerVisible } = usePlayer()
+
+  const handlePlayEpisode = (episode: any) => {
+    if (currentEpisode?.id === episode.id) {
+      setIsPlaying(!isPlaying)
+    } else {
+      setCurrentEpisode({
+        ...episode,
+        podcast: podcast
+      })
+      setIsPlayerVisible(true)
+    }
+  }
 
   useEffect(() => {
     const loadData = async () => {
@@ -162,7 +176,34 @@ export default function PodcastPage() {
       {selectedEpisode ? (
         <div>
           <h2 className="text-2xl font-bold mb-4">Now Playing</h2>
-          <AdvancedMediaPlayer episode={selectedEpisode} />
+          <Card className="p-6 bg-card/40 backdrop-blur-md border-none shadow-xl flex items-center justify-between gap-6">
+            <div className="flex items-center gap-6 flex-1 min-w-0">
+              <div className="relative h-20 w-20 rounded-xl overflow-hidden shadow-lg flex-shrink-0">
+                {podcast.cover_image_url ? (
+                  <Image src={podcast.cover_image_url} alt={selectedEpisode.title} fill className="object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Music className="h-8 w-8" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-xl font-black truncate">{selectedEpisode.title}</h3>
+                <p className="text-muted-foreground line-clamp-1">{selectedEpisode.description || 'No description'}</p>
+              </div>
+            </div>
+            <Button 
+              size="icon" 
+              onClick={() => handlePlayEpisode(selectedEpisode)}
+              className="h-16 w-16 rounded-full bg-primary text-primary-foreground shadow-2xl hover:scale-110 active:scale-95 transition-all"
+            >
+              {isPlaying && currentEpisode?.id === selectedEpisode.id ? (
+                <Pause className="h-8 w-8" />
+              ) : (
+                <Play className="h-8 w-8 ml-1" />
+              )}
+            </Button>
+          </Card>
         </div>
       ) : (
         <Card className="p-8 text-center">

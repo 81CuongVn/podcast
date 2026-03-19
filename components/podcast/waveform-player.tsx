@@ -6,6 +6,7 @@ import { usePlayer } from '@/lib/player-context'
 import { Play, Pause } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
 
 interface WaveformPlayerProps {
   audioUrl: string
@@ -47,9 +48,11 @@ export function WaveformPlayer({
       barGap,
       height,
       normalize: true,
-      muted: true, // Visual only
       interact: true, // Allow seeking
     })
+
+    // Mute the wavesurfer instance manually after creation if needed
+    // wavesurfer.current.setMuted(true) 
 
     wavesurfer.current.load(audioUrl)
 

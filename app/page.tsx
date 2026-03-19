@@ -11,6 +11,7 @@ import { Zap, Users, BarChart3, Headphones, Play, TrendingUp, Flame, Share2, Mai
 import Link from 'next/link'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
 // Revalidate every 5 minutes to show fresh content
 export const revalidate = 300
