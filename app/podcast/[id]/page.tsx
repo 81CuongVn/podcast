@@ -8,7 +8,10 @@ import Link from 'next/link'
 import { SubscribeButton } from '@/components/subscribe-button'
 import { FollowButton } from '@/components/follow-button'
 import Image from 'next/image'
-import { Music, Users, Share2 } from 'lucide-react'
+import { Music, Users, Share2, Play, Heart, MessageSquare, Repeat, ListMusic } from 'lucide-react'
+import { WaveformPlayer } from '@/components/podcast/waveform-player'
+import { usePlayer } from '@/lib/player-context'
+import { cn } from '@/lib/utils'
 
 interface PodcastDetailPageProps {
   params: Promise<{ id: string }>
@@ -20,6 +23,7 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
   const [loading, setLoading] = useState(true)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const { setCurrentEpisode, isPlaying, setIsPlaying, currentEpisode } = usePlayer()
   const supabase = createClient()
 
   useEffect(() => {
@@ -72,10 +76,21 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
     loadData()
   }, [params, supabase])
 
+  const handlePlayEpisode = (episode: any) => {
+    if (currentEpisode?.id === episode.id) {
+      setIsPlaying(!isPlaying)
+    } else {
+      setCurrentEpisode({
+        ...episode,
+        podcast: podcast
+      })
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     )
   }
@@ -93,24 +108,81 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-          <Button variant="ghost" asChild>
-            <Link href="/">← Back</Link>
-          </Button>
-        </div>
-      </div>
+  const latestEpisode = episodes[0]
 
-      {/* Podcast Info */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-          {/* Cover and Actions */}
-          <div className="flex flex-col">
-            <div className="relative w-full aspect-square bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg overflow-hidden">
-              {podcast.cover_image_url && !podcast.cover_image_url.includes('undefined') ? (
+  return (
+    <div className="min-h-screen bg-background pb-32">
+      {/* SoundCloud Style Hero Banner */}
+      <div className="relative w-full bg-[#333] overflow-hidden group">
+        {/* Background Blur */}
+        <div className="absolute inset-0 z-0">
+          {podcast.cover_image_url && (
+            <Image 
+              src={podcast.cover_image_url} 
+              alt="blur" 
+              fill 
+              className="object-cover blur-3xl opacity-30 scale-110" 
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-7xl px-6 py-8 md:py-12">
+          <div className="flex flex-col md:flex-row gap-8 md:items-center">
+            {/* Play Button & Info */}
+            <div className="flex-1 space-y-6">
+              <div className="flex items-start gap-4">
+                <Button 
+                  onClick={() => latestEpisode && handlePlayEpisode(latestEpisode)}
+                  size="icon" 
+                  className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-[#f50] hover:bg-[#ff4500] shadow-2xl transition-all hover:scale-110 shrink-0"
+                >
+                  {isPlaying && currentEpisode?.id === latestEpisode?.id ? (
+                    <div className="flex gap-1 items-end h-8">
+                      {[1, 2, 3, 4].map(i => (
+                        <motion.div 
+                          key={i}
+                          animate={{ height: [8, 24, 12, 28, 8] }}
+                          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.1 }}
+                          className="w-1.5 bg-white rounded-full"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <Play className="h-8 w-8 md:h-10 md:w-10 fill-current ml-1" />
+                  )}
+                </Button>
+                <div>
+                  <div className="inline-block bg-black/80 text-white px-3 py-1 text-sm font-bold mb-2">
+                    {podcast.title}
+                  </div>
+                  <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
+                    {latestEpisode?.title || podcast.title}
+                  </h1>
+                  <Link 
+                    href={`/profile/${podcast.user_id}`}
+                    className="text-lg md:text-xl font-bold text-white/70 hover:text-[#f50] transition-colors mt-2 block"
+                  >
+                    {podcast.profiles?.display_name || 'Unknown Creator'}
+                  </Link>
+                </div>
+              </div>
+
+              {/* Waveform Area */}
+              {latestEpisode && (
+                <div className="mt-8">
+                  <WaveformPlayer 
+                    audioUrl={latestEpisode.audio_url} 
+                    height={120}
+                    className="opacity-90 hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Large Cover Art */}
+            <div className="w-full md:w-80 aspect-square relative shadow-2xl rounded-sm overflow-hidden group-hover:scale-[1.02] transition-transform duration-500">
+              {podcast.cover_image_url ? (
                 <Image
                   src={podcast.cover_image_url}
                   alt={podcast.title}
@@ -118,120 +190,166 @@ export default function PodcastDetailPage({ params }: PodcastDetailPageProps) {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Music className="w-16 h-16 text-white opacity-30" />
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#444] to-[#222]">
+                  <Music className="w-20 h-20 text-white/20" />
                 </div>
               )}
             </div>
-
-            <div className="mt-6 space-y-3">
-              {user ? (
-                <>
-                  <div className="w-full">
-                    <SubscribeButton podcastId={podcast.id} isSubscribed={isSubscribed} />
-                  </div>
-                  <Button variant="outline" className="w-full">
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                </>
-              ) : (
-                <Button asChild className="w-full">
-                  <Link href="/auth/sign-up">Subscribe to Podcast</Link>
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Details */}
-          <div className="md:col-span-2">
-            <h1 className="text-4xl font-bold mb-2">{podcast.title}</h1>
-            
-            {/* Creator Info */}
-            <div className="flex items-center gap-3 mb-6">
-              {podcast.profiles?.avatar_url && (
-                <Image
-                  src={podcast.profiles.avatar_url}
-                  alt={podcast.profiles.display_name}
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 rounded-full"
-                />
-              )}
-              <div>
-                <Link
-                  href={`/profile/${podcast.user_id}`}
-                  className="font-semibold text-lg hover:text-primary transition-colors"
-                >
-                  {podcast.profiles?.display_name || 'Unknown Creator'}
-                </Link>
-                <p className="text-sm text-muted-foreground">
-                  @{podcast.profiles?.username}
-                </p>
-              </div>
-              {user && user.id !== podcast.user_id && (
-                <div className="ml-auto">
-                  <FollowButton userId={podcast.user_id} isFollowing={false} />
-                </div>
-              )}
-            </div>
-
-            {/* Stats */}
-            <div className="flex gap-6 mb-6 pb-6 border-b">
-              <div>
-                <p className="text-sm text-muted-foreground">Subscribers</p>
-                <p className="text-2xl font-bold">{Math.floor(Math.random() * 5000) + 100}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Episodes</p>
-                <p className="text-2xl font-bold">{episodes.length}</p>
-              </div>
-            </div>
-
-            {/* Description */}
-            <p className="text-lg leading-relaxed text-muted-foreground">
-              {podcast.description || 'No description available'}
-            </p>
           </div>
         </div>
+      </div>
 
-        {/* Episodes */}
-        <div className="mt-16">
-          <h2 className="text-3xl font-bold mb-8">Episodes</h2>
-          
-          {episodes.length > 0 ? (
-            <div className="space-y-4">
-              {episodes.map((episode) => (
-                <Card key={episode.id} className="p-6 hover:shadow-md transition-shadow">
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg mb-2">{episode.title}</h3>
-                      <p className="text-muted-foreground mb-3 line-clamp-2">
-                        {episode.description}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(episode.published_at).toLocaleDateString()} •{' '}
-                        {Math.round(episode.duration_seconds / 60)} min
+      {/* Action Bar */}
+      <div className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-30">
+        <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="font-bold border-border/50">
+              <Heart className="h-4 w-4 mr-2" /> Like
+            </Button>
+            <Button variant="outline" size="sm" className="font-bold border-border/50">
+              <Repeat className="h-4 w-4 mr-2" /> Repost
+            </Button>
+            <Button variant="outline" size="sm" className="font-bold border-border/50">
+              <Share2 className="h-4 w-4 mr-2" /> Share
+            </Button>
+            <Button variant="outline" size="sm" className="font-bold border-border/50">
+              <LinkMusic className="h-4 w-4 mr-2" /> Copy Link
+            </Button>
+          </div>
+          <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <Play className="h-4 w-4" /> {Math.floor(Math.random() * 10000)}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Heart className="h-4 w-4" /> {Math.floor(Math.random() * 500)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+          {/* Main Content (Episodes List) */}
+          <div className="lg:col-span-3 space-y-8">
+            <div className="flex items-center justify-between border-b border-border pb-4">
+              <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                <ListMusic className="h-6 w-6 text-[#f50]" />
+                Episodes
+              </h2>
+            </div>
+
+            {episodes.length > 0 ? (
+              <div className="space-y-4">
+                {episodes.map((episode, idx) => (
+                  <div 
+                    key={episode.id} 
+                    className={cn(
+                      "group flex gap-4 p-4 rounded-xl hover:bg-muted/50 transition-all border border-transparent hover:border-border/50",
+                      currentEpisode?.id === episode.id && "bg-muted border-border"
+                    )}
+                  >
+                    <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-muted shrink-0 shadow-sm">
+                      {podcast.cover_image_url ? (
+                        <Image src={podcast.cover_image_url} alt={episode.title} fill className="object-cover" />
+                      ) : (
+                        <Music className="h-6 w-6 text-muted-foreground absolute center" />
+                      )}
+                      <button 
+                        onClick={() => handlePlayEpisode(episode)}
+                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      >
+                        {isPlaying && currentEpisode?.id === episode.id ? (
+                          <Pause className="h-6 w-6 text-white fill-current" />
+                        ) : (
+                          <Play className="h-6 w-6 text-white fill-current ml-1" />
+                        )}
+                      </button>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground mb-1 uppercase tracking-widest">
+                        <span>{podcast.profiles?.display_name}</span>
+                        <span>•</span>
+                        <span>{new Date(episode.published_at).toLocaleDateString()}</span>
+                      </div>
+                      <h3 className="font-bold text-lg truncate group-hover:text-[#f50] transition-colors">
+                        {episode.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
+                        {episode.description || 'No description provided'}
                       </p>
                     </div>
-                    {episode.audio_pathname && user && (
-                      <Button asChild variant="outline">
-                        <Link href={`/api/download-audio?pathname=${encodeURIComponent(episode.audio_pathname)}`}>
-                          Play
-                        </Link>
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-4 text-xs font-bold text-muted-foreground/60">
+                      <div className="flex items-center gap-1">
+                        <Play className="h-3 w-3" /> {Math.floor(Math.random() * 1000)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MessageSquare className="h-3 w-3" /> {Math.floor(Math.random() * 50)}
+                      </div>
+                    </div>
                   </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="p-8 text-center text-muted-foreground">
-              No episodes available yet
+                ))}
+              </div>
+            ) : (
+              <Card className="p-12 text-center text-muted-foreground border-dashed">
+                No episodes available yet
+              </Card>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-10">
+            {/* Creator Info Card */}
+            <Card className="p-6 rounded-2xl border-none shadow-xl bg-card/50 backdrop-blur-md">
+              <div className="flex flex-col items-center text-center">
+                <div className="relative h-24 w-24 rounded-full overflow-hidden mb-4 border-4 border-background shadow-2xl">
+                  {podcast.profiles?.avatar_url ? (
+                    <Image
+                      src={podcast.profiles.avatar_url}
+                      alt={podcast.profiles.display_name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <Users className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <h3 className="font-black text-xl mb-1">{podcast.profiles?.display_name}</h3>
+                <p className="text-sm font-bold text-muted-foreground mb-6">@{podcast.profiles?.username}</p>
+                
+                <div className="grid grid-cols-2 gap-4 w-full mb-6">
+                  <div className="text-center">
+                    <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Followers</p>
+                    <p className="text-xl font-black">4.5K</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Tracks</p>
+                    <p className="text-xl font-black">{episodes.length}</p>
+                  </div>
+                </div>
+
+                {user && user.id !== podcast.user_id ? (
+                  <FollowButton userId={podcast.user_id} isFollowing={false} />
+                ) : (
+                  <Button variant="secondary" className="w-full rounded-full font-black">
+                    Edit Profile
+                  </Button>
+                )}
+              </div>
             </Card>
-          )}
+
+            {/* Description Card */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground px-1">About this podcast</h3>
+              <p className="text-sm leading-relaxed font-medium text-muted-foreground/80 px-1">
+                {podcast.description || 'No description available'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   )
 }
+

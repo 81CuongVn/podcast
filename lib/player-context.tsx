@@ -8,6 +8,12 @@ interface PlayerContextType {
   setCurrentEpisode: (episode: Episode | null) => void
   isPlayerVisible: boolean
   setIsPlayerVisible: (visible: boolean) => void
+  isPlaying: boolean
+  setIsPlaying: (playing: boolean) => void
+  isLoop: boolean
+  setIsLoop: (loop: boolean) => void
+  isShuffle: boolean
+  setIsShuffle: (shuffle: boolean) => void
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined)
@@ -15,10 +21,14 @@ const PlayerContext = createContext<PlayerContextType | undefined>(undefined)
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null)
   const [isPlayerVisible, setIsPlayerVisible] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isLoop, setIsLoop] = useState(false)
+  const [isShuffle, setIsShuffle] = useState(false)
 
   const handleSetCurrentEpisode = (episode: Episode | null) => {
     setCurrentEpisode(episode)
     setIsPlayerVisible(episode !== null)
+    if (episode) setIsPlaying(true)
   }
 
   return (
@@ -28,6 +38,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setCurrentEpisode: handleSetCurrentEpisode,
         isPlayerVisible,
         setIsPlayerVisible,
+        isPlaying,
+        setIsPlaying,
+        isLoop,
+        setIsLoop,
+        isShuffle,
+        setIsShuffle,
       }}
     >
       {children}

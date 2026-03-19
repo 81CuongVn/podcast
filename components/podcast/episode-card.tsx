@@ -1,30 +1,32 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Play, Pause, Download, Share2 } from 'lucide-react'
+import { Play, Pause, Download, Share2, Music, Heart, Clock, Calendar } from 'lucide-react'
 import type { Episode } from '@/lib/types'
 import { usePlayer } from '@/lib/player-context'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 interface EpisodeCardProps {
-  episode: Episode & { podcasts?: { title: string; id: string; cover_image_url?: string | null } }
+  episode: Episode & { podcasts?: { title: string; id: string; cover_image_url?: string | null; profiles?: { display_name?: string; avatar_url?: string | null } } }
   showPodcast?: boolean
+  className?: string
 }
 
-export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
-  const { currentEpisode, setCurrentEpisode, setIsPlayerVisible } = usePlayer()
+export function EpisodeCard({ episode, showPodcast = true, className }: EpisodeCardProps) {
+  const { currentEpisode, setCurrentEpisode, isPlaying, setIsPlaying, setIsPlayerVisible } = usePlayer()
   
-  const isPlaying = currentEpisode?.id === episode.id
+  const isCurrent = currentEpisode?.id === episode.id
+  const active = isCurrent && isPlaying
 
   const formatDuration = (seconds: number | null) => {
     if (seconds === null || seconds === undefined || isNaN(seconds)) return '0:00'
     const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+    return `${mins} min`
   }
 
   const formatDate = (dateString: string) => {
@@ -40,19 +42,24 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    // Ensure media_url points to our local API for consistent streaming/inline display
-    const playableEpisode = {
-      ...episode,
-      media_url: `/api/download-audio?path=${encodeURIComponent(episode.audio_pathname || '')}`
+    
+    if (isCurrent) {
+      setIsPlaying(!isPlaying)
+    } else {
+      const playableEpisode = {
+        ...episode,
+        podcast: episode.podcasts // Ensure podcast context is passed
+      }
+      setCurrentEpisode(playableEpisode as any)
+      setIsPlayerVisible(true)
+      setIsPlaying(true)
     }
-    setCurrentEpisode(playableEpisode as any)
-    setIsPlayerVisible(true)
   }
 
   const handleDownload = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    const url = episode.media_url || episode.audio_url
+    const url = episode.audio_url
     if (url) {
       window.open(`/api/download-audio?path=${encodeURIComponent(episode.audio_pathname || '')}`, '_blank')
     }
@@ -67,100 +74,115 @@ export function EpisodeCard({ episode, showPodcast = true }: EpisodeCardProps) {
   }
 
   return (
-    <Card className="hover:shadow-2xl transition-all duration-500 group relative overflow-hidden border-none bg-card/50 backdrop-blur-sm hover:-translate-y-2">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
-      <CardHeader className="pb-4 relative z-10">
-        <div className="flex flex-col gap-4">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl shadow-lg">
-            {episode.podcasts?.cover_image_url ? (
-              <Image 
-                src={episode.podcasts.cover_image_url} 
-                alt={episode.title} 
-                fill 
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-                <Play className="h-12 w-12 text-primary/40" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Button
-                size="icon"
-                onClick={handlePlay}
-                className={`rounded-full h-16 w-16 shadow-2xl transition-all duration-500 hover:scale-110 ${
-                  isPlaying ? 'bg-primary text-primary-foreground' : 'bg-white text-black hover:bg-primary hover:text-primary-foreground'
-                }`}
-              >
-                {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
-              </Button>
+    <motion.div
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.3 }}
+      className={cn("group relative", className)}
+    >
+      <Card className="overflow-hidden border-none shadow-xl shadow-muted/50 bg-card/40 backdrop-blur-md rounded-[2.5rem] h-full flex flex-col transition-all duration-500 hover:shadow-2xl hover:bg-card/60">
+        {/* Cover Image Area */}
+        <div className="relative aspect-square overflow-hidden">
+          {episode.podcasts?.cover_image_url ? (
+            <Image
+              src={episode.podcasts.cover_image_url}
+              alt={episode.title}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+              <Music className="h-12 w-12 text-primary/40" />
             </div>
+          )}
+          
+          {/* Overlay & Play Button */}
+          <div className={cn(
+            "absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-300",
+            active ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          )}>
+            <Button
+              size="icon"
+              onClick={handlePlay}
+              className={cn(
+                "h-16 w-16 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 border-none",
+                active ? "bg-[#f50] text-white" : "bg-white/20 backdrop-blur-md text-white hover:bg-[#f50]"
+              )}
+            >
+              {active ? (
+                <div className="flex gap-1 items-end h-6">
+                  {[1, 2, 3].map(i => (
+                    <motion.div 
+                      key={i}
+                      animate={{ height: [8, 20, 10, 24, 8] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.1 }}
+                      className="w-1 bg-white rounded-full"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Play className="h-8 w-8 fill-current ml-1" />
+              )}
+            </Button>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">
-              {formatDate(episode.published_at || episode.created_at)}
-            </p>
-            <Link href={`/podcast/${episode.podcast_id}`} className="hover:text-primary transition-colors">
-              <CardTitle className="line-clamp-1 text-xl font-black leading-tight group-hover:text-primary transition-colors">
-                {episode.title}
-              </CardTitle>
-            </Link>
-            {showPodcast && episode.podcasts && (
-              <CardDescription className="mt-1 font-bold text-sm text-muted-foreground/80">
+          {/* Podcast Title Badge */}
+          {showPodcast && episode.podcasts && (
+            <div className="absolute top-4 left-4 right-4">
+              <Link 
+                href={`/podcast/${episode.podcast_id}`}
+                className="inline-block px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-black text-white uppercase tracking-widest hover:bg-[#f50] transition-colors max-w-full truncate"
+              >
                 {episode.podcasts.title}
-              </CardDescription>
-            )}
-          </div>
+              </Link>
+            </div>
+          )}
         </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4 relative z-10">
-        {episode.description && (
-          <p className="line-clamp-2 text-sm text-muted-foreground leading-relaxed font-medium">
-            {episode.description}
-          </p>
-        )}
-        
-        <div className="flex items-center justify-between pt-4 border-t border-border/50">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handlePlay}
-              className="rounded-full font-black text-xs h-8 px-4 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
-            >
-              {isPlaying ? 'PAUSE' : 'LISTEN'}
-            </Button>
-            {episode.duration && (
-              <span className="text-[10px] font-black text-muted-foreground">
-                {formatDuration(episode.duration)} MIN
-              </span>
-            )}
+
+        {/* Content */}
+        <div className="p-6 flex-1 flex flex-col">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="relative h-8 w-8 rounded-full overflow-hidden border border-border/50 bg-muted shrink-0">
+              {episode.podcasts?.profiles?.avatar_url ? (
+                <Image src={episode.podcasts.profiles.avatar_url} alt="Avatar" fill className="object-cover" />
+              ) : (
+                <div className="flex items-center justify-center h-full w-full bg-primary/10 text-[10px] font-black text-primary">
+                  {episode.podcasts?.profiles?.display_name?.charAt(0) || 'U'}
+                </div>
+              )}
+            </div>
+            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest truncate">
+              {episode.podcasts?.profiles?.display_name || 'Creator'}
+            </span>
           </div>
+
+          <h3 className="text-lg font-black leading-tight mb-2 group-hover:text-[#f50] transition-colors line-clamp-2">
+            {episode.title}
+          </h3>
           
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleShare}
-              className="rounded-full h-8 w-8 text-muted-foreground hover:text-primary"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDownload}
-              className="rounded-full h-8 w-8 text-muted-foreground hover:text-primary"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
+          {episode.description && (
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-4 font-medium opacity-80 leading-relaxed">
+              {episode.description}
+            </p>
+          )}
+
+          <div className="mt-auto pt-4 border-t border-border/50 flex items-center justify-between text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" /> {formatDate(episode.published_at || episode.created_at)}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" /> {formatDuration(episode.duration_seconds || (episode as any).duration)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={handleShare} className="hover:text-[#f50] transition-colors"><Share2 className="h-3.5 w-3.5" /></button>
+              <button onClick={handleDownload} className="hover:text-[#f50] transition-colors"><Download className="h-3.5 w-3.5" /></button>
+            </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </Card>
+    </motion.div>
   )
 }
+
 
