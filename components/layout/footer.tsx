@@ -1,7 +1,12 @@
+'use client'
+
 import Link from 'next/link'
 import { Headphones, Github, Twitter, Mail } from 'lucide-react'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 
 export function Footer() {
+  const { siteTitle, publicRegistration } = useSiteSettings()
+
   return (
     <footer className="border-t border-border bg-background">
       <div className="container mx-auto px-4 py-16">
@@ -12,7 +17,7 @@ export function Footer() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
                 <Headphones className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span>PodStream</span>
+              <span>{siteTitle}</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Create and share podcasts with the world. Discover amazing shows from creators everywhere. Build your audience and grow together.
@@ -62,9 +67,13 @@ export function Footer() {
             <h4 className="mb-4 font-semibold text-sm uppercase tracking-wide text-foreground">For Creators</h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/auth/sign-up" className="text-muted-foreground transition-colors hover:text-primary">
-                  Create Podcast
-                </Link>
+                {publicRegistration ? (
+                  <Link href="/auth/sign-up" className="text-muted-foreground transition-colors hover:text-primary">
+                    Create Podcast
+                  </Link>
+                ) : (
+                  <span className="text-muted-foreground/60">Create Podcast</span>
+                )}
               </li>
               <li>
                 <Link href="/dashboard" className="text-muted-foreground transition-colors hover:text-primary">
@@ -98,11 +107,13 @@ export function Footer() {
                   Terms of Service
                 </Link>
               </li>
-              <li>
-                <Link href="/auth/sign-up" className="text-muted-foreground transition-colors hover:text-primary">
-                  Sign Up
-                </Link>
-              </li>
+              {publicRegistration && (
+                <li>
+                  <Link href="/auth/sign-up" className="text-muted-foreground transition-colors hover:text-primary">
+                    Sign Up
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href="/auth/login" className="text-muted-foreground transition-colors hover:text-primary">
                   Sign In
@@ -114,7 +125,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} PodStream. All rights reserved.
+            © {new Date().getFullYear()} {siteTitle}. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
             Built with ❤️ by podcast creators, for podcast creators.

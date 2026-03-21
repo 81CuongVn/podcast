@@ -12,14 +12,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { getSiteSettingsServer } from '@/lib/site-settings-server'
 
 // Revalidate every 5 minutes to show fresh content
 export const revalidate = 300
-
-export const metadata = {
-  title: 'PodStream - Discover & Create Podcasts',
-  description: 'Discover amazing podcasts and create your own shows. Connect with creators worldwide.',
-}
 
 async function getUserProfile() {
   const supabase = await createClient()
@@ -79,12 +75,13 @@ async function getPopularCreators() {
 }
 
 export default async function HomePage() {
-  const [profile, podcasts, recentEpisodes, trendingPodcasts, popularCreators] = await Promise.all([
+  const [profile, podcasts, recentEpisodes, trendingPodcasts, popularCreators, siteSettings] = await Promise.all([
     getUserProfile(),
     getFeaturedPodcasts(),
     getRecentEpisodes(),
     getTrendingPodcasts(),
     getPopularCreators(),
+    getSiteSettingsServer(),
   ])
 
   return (
@@ -119,6 +116,7 @@ export default async function HomePage() {
               <HeroButtons 
                 profile={profile} 
                 latestEpisode={recentEpisodes.length > 0 ? recentEpisodes[0] : null} 
+                publicRegistration={siteSettings.publicRegistration}
               />
             </div>
           </div>
@@ -318,7 +316,7 @@ export default async function HomePage() {
         </section>
 
         {/* CTA Section - Premium Look */}
-        {!profile && (
+        {!profile && siteSettings.publicRegistration && (
           <section className="py-32 relative">
             <div className="container mx-auto px-4">
               <div className="relative rounded-[3rem] overflow-hidden bg-primary p-12 md:p-24 text-center">

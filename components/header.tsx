@@ -17,6 +17,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import type { Profile } from '@/lib/types/database'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 
 export function Header() {
   const pathname = usePathname()
@@ -24,6 +25,7 @@ export function Header() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
+  const { siteTitle, publicRegistration, maintenanceMode } = useSiteSettings()
 
   useEffect(() => {
     const getUser = async () => {
@@ -66,7 +68,7 @@ export function Header() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <Headphones className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">PodStream</span>
+            <span className="text-xl font-bold text-foreground">{siteTitle}</span>
           </Link>
           
           <nav className="hidden items-center gap-1 md:flex">
@@ -95,6 +97,11 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3">
+          {maintenanceMode && (
+            <span className="hidden rounded-full bg-amber-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 sm:inline-flex">
+              Maintenance mode
+            </span>
+          )}
           {isLoading ? (
             <div className="h-9 w-9 animate-pulse rounded-full bg-muted" />
           ) : user ? (
@@ -164,11 +171,13 @@ export function Header() {
                   Sign in
                 </Button>
               </Link>
-              <Link href="/auth/sign-up">
-                <Button size="sm">
-                  Get started
-                </Button>
-              </Link>
+              {publicRegistration && (
+                <Link href="/auth/sign-up">
+                  <Button size="sm">
+                    Get started
+                  </Button>
+                </Link>
+              )}
             </>
           )}
           

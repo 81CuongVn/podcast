@@ -9,9 +9,10 @@ import type { Episode } from '@/lib/types/database'
 interface HeroButtonsProps {
   profile: any
   latestEpisode: Episode | null
+  publicRegistration: boolean
 }
 
-export function HeroButtons({ profile, latestEpisode }: HeroButtonsProps) {
+export function HeroButtons({ profile, latestEpisode, publicRegistration }: HeroButtonsProps) {
   const { setCurrentEpisode, setIsPlayerVisible } = usePlayer()
 
   const handlePlayLatest = (e: React.MouseEvent) => {
@@ -25,11 +26,13 @@ export function HeroButtons({ profile, latestEpisode }: HeroButtonsProps) {
   if (!profile) {
     return (
       <div className="flex flex-wrap items-center justify-center gap-6">
-        <Button asChild size="lg" className="h-14 px-10 text-lg font-bold rounded-full shadow-2xl shadow-primary/30 transition-all hover:scale-105">
-          <Link href="/auth/sign-up">
-            Start Free Trial
-          </Link>
-        </Button>
+        {publicRegistration && (
+          <Button asChild size="lg" className="h-14 px-10 text-lg font-bold rounded-full shadow-2xl shadow-primary/30 transition-all hover:scale-105">
+            <Link href="/auth/sign-up">
+              Start Free Trial
+            </Link>
+          </Button>
+        )}
         <Button 
           variant="outline" 
           size="lg" 

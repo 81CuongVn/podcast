@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Mic, Menu, X, Search, Bell, User as UserIcon, LayoutDashboard, LogOut } from 'lucide-react'
+import { Mic, Menu, X, Search, Bell, LayoutDashboard, LogOut } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 
 export function Header() {
   const router = useRouter()
@@ -19,6 +20,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const supabase = createClient()
+  const { siteTitle, publicRegistration, maintenanceMode } = useSiteSettings()
 
   useEffect(() => {
     setMounted(true)
@@ -73,7 +75,7 @@ export function Header() {
             <Mic className="h-6 w-6 text-white relative z-10" />
           </motion.div>
           <div className="flex flex-col">
-            <span className="font-black text-xl tracking-tighter leading-none bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">PodHub</span>
+            <span className="font-black text-xl tracking-tighter leading-none bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">{siteTitle}</span>
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 leading-none mt-1">Professional</span>
           </div>
         </Link>
@@ -109,14 +111,22 @@ export function Header() {
             <Search className="h-5 w-5 text-muted-foreground" />
           </Button>
           
+          {maintenanceMode && (
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+              Maintenance mode
+            </span>
+          )}
+
           {mounted && !loading && !user && (
             <div className="flex items-center gap-3 ml-2">
               <Button variant="ghost" asChild className="font-black uppercase tracking-widest text-xs h-11 px-6 rounded-full hover:bg-muted/50">
                 <Link href="/auth/login">Sign In</Link>
               </Button>
-              <Button size="lg" asChild className="font-black uppercase tracking-widest text-xs h-11 px-8 rounded-full shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-purple-600 hover:scale-105 transition-all">
-                <Link href="/auth/sign-up">Get Started</Link>
-              </Button>
+              {publicRegistration && (
+                <Button size="lg" asChild className="font-black uppercase tracking-widest text-xs h-11 px-8 rounded-full shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-purple-600 hover:scale-105 transition-all">
+                  <Link href="/auth/sign-up">Get Started</Link>
+                </Button>
+              )}
             </div>
           )}
 
@@ -192,9 +202,11 @@ export function Header() {
                     <Button variant="outline" size="lg" asChild className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-sm border-2">
                       <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
                     </Button>
-                    <Button size="lg" asChild className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-purple-600">
-                      <Link href="/auth/sign-up" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
-                    </Button>
+                    {publicRegistration && (
+                      <Button size="lg" asChild className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-purple-600">
+                        <Link href="/auth/sign-up" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
+                      </Button>
+                    )}
                   </div>
                 )}
                 {mounted && user && (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
@@ -11,12 +11,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { ShieldCheck, Database, CloudUpload, Save, Globe, Type, Image as ImageIcon, Share2, Zap, Code, Layout, Search, Lock, Smartphone, Activity, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  DEFAULT_SITE_SETTINGS,
+  mergeSiteSettings,
+} from '@/lib/site-settings'
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(false)
-  const [siteTitle, setSiteTitle] = useState('PodHub')
-  const [siteDescription, setSiteDescription] = useState('The professional podcast platform for creators and listeners.')
-  const [siteDomain, setSiteDomain] = useState('podhub.com')
+  const [siteTitle, setSiteTitle] = useState(DEFAULT_SITE_SETTINGS.siteTitle)
+  const [siteDescription, setSiteDescription] = useState(DEFAULT_SITE_SETTINGS.siteDescription)
+  const [siteDomain, setSiteDomain] = useState(DEFAULT_SITE_SETTINGS.siteDomain)
   const [bgImage, setBgImage] = useState('https://images.unsplash.com/photo-1590602847861-f357a9332bbc')
   const [primaryColor, setPrimaryColor] = useState('#6366f1')
   const [appearance, setAppearance] = useState({
@@ -25,18 +29,78 @@ export default function AdminSettingsPage() {
     mobileNav: true,
   })
   const [security, setSecurity] = useState({
-    publicRegistration: true,
+    publicRegistration: DEFAULT_SITE_SETTINGS.publicRegistration,
     emailVerification: true,
     moderatorDashboard: false,
-    maintenanceMode: false,
+    maintenanceMode: DEFAULT_SITE_SETTINGS.maintenanceMode,
   })
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch('/api/site-settings', {
+          method: 'GET',
+          cache: 'no-store',
+        })
+        if (!response.ok) return
+        const persisted = mergeSiteSettings(await response.json())
+        setSiteTitle(persisted.siteTitle)
+        setSiteDescription(persisted.siteDescription)
+        setSiteDomain(persisted.siteDomain)
+        setSecurity((current) => ({
+          ...current,
+          publicRegistration: persisted.publicRegistration,
+          maintenanceMode: persisted.maintenanceMode,
+        }))
+      } catch {
+        // Keep defaults on transient failures.
+      }
+    }
+
+    void loadSettings()
+  }, [])
 
   const handleSave = async () => {
     setLoading(true)
-    setTimeout(() => {
+
+    try {
+      const nextSettings = mergeSiteSettings({
+        siteTitle,
+        siteDescription,
+        siteDomain,
+        publicRegistration: security.publicRegistration,
+        maintenanceMode: security.maintenanceMode,
+      })
+
+      const response = await fetch('/api/site-settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nextSettings),
+      })
+
+      if (!response.ok) {
+        throw new Error('save_failed')
+      }
+
+      const savedSettings = mergeSiteSettings(await response.json())
+      setSiteTitle(savedSettings.siteTitle)
+      setSiteDescription(savedSettings.siteDescription)
+      setSiteDomain(savedSettings.siteDomain)
+      setSecurity((current) => ({
+        ...current,
+        publicRegistration: savedSettings.publicRegistration,
+        maintenanceMode: savedSettings.maintenanceMode,
+      }))
+      window.dispatchEvent(new CustomEvent('site-settings-updated', { detail: savedSettings }))
+
       toast.success('System settings updated successfully')
+    } catch {
+      toast.error('Unable to save settings. Please try again.')
+    } finally {
       setLoading(false)
-    }, 1000)
+    }
   }
 
   return (

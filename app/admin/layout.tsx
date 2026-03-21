@@ -26,6 +26,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
@@ -33,6 +34,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const supabase = createClient()
+  const { siteTitle } = useSiteSettings()
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -145,7 +147,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <Mic className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-base font-black tracking-tight text-slate-950">PodHub Admin</p>
+              <p className="text-base font-black tracking-tight text-slate-950">{siteTitle} Admin</p>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Control center</p>
             </div>
           </Link>
