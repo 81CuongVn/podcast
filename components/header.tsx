@@ -138,7 +138,7 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href={`/user/${user.id}`} className="flex cursor-pointer items-center gap-2">
+                    <Link href={`/profile/${user.id}`} className="flex cursor-pointer items-center gap-2">
                       <User className="h-4 w-4" />
                       Profile
                     </Link>
