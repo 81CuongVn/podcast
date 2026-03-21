@@ -5,6 +5,7 @@ import { redirect, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import {
+  ChevronLeft,
   LayoutDashboard,
   Settings,
   Users,
@@ -246,6 +247,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </div>
 
             <div className="ml-auto flex items-center gap-2 sm:gap-3">
+              <Button asChild variant="outline" className="hidden h-10 rounded-2xl border-slate-200 px-4 font-semibold lg:inline-flex">
+                <Link href="/">
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Back to homepage
+                </Link>
+              </Button>
               <Button variant="ghost" size="icon" className="relative rounded-xl text-slate-500">
                 <Bell className="h-4.5 w-4.5" />
                 <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
@@ -266,7 +273,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-[1440px]">{children}</div>
+          <div className="mx-auto max-w-[1440px]">
+            <div className="mb-4 lg:hidden">
+              <Button asChild variant="outline" className="h-10 rounded-2xl border-slate-200 px-4 font-semibold">
+                <Link href="/">
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Back to homepage
+                </Link>
+              </Button>
+            </div>
+            {children}
+          </div>
         </main>
       </div>
     </div>

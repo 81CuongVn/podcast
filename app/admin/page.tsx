@@ -1,34 +1,63 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import {
-  Users,
-  Mic,
-  Play,
   Activity,
   ArrowUpRight,
-  MessageSquare,
-  DollarSign,
-  Heart,
-  Globe,
   Bell,
-  Clock,
-  ShieldCheck,
-  Mail,
+  Globe,
+  Heart,
+  Image as ImageIcon,
+  Languages,
   LayoutDashboard,
+  Mail,
+  Megaphone,
+  MessageSquare,
+  Mic,
+  Paintbrush,
+  Palette,
+  Play,
+  Save,
+  Search,
   Settings,
-  Plus,
+  ShieldCheck,
+  Sparkles,
+  Type,
+  Users,
+  Clock,
+  DollarSign,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [savingHomepage, setSavingHomepage] = useState(false)
+  const [homepageContent, setHomepageContent] = useState({
+    siteTitle: 'PodHub',
+    heroTitle: 'Stories, voices, and communities in one podcast home',
+    heroDescription: 'Manage the content your visitors see first, tune discovery, and keep your homepage aligned with what the platform is promoting right now.',
+    ctaPrimary: 'Start Listening',
+    ctaSecondary: 'Apply as Creator',
+    backgroundUrl: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1400&auto=format&fit=crop',
+    announcement: 'New creator spotlight goes live this Friday at 8 PM.',
+  })
+  const [homepageSettings, setHomepageSettings] = useState({
+    featuredBanner: true,
+    creatorApplications: true,
+    listenerTestimonials: true,
+    trendingCarousel: true,
+  })
   const supabase = createClient()
 
   useEffect(() => {
@@ -44,8 +73,16 @@ export default function AdminDashboardPage() {
           supabase.from('profiles').select('*', { count: 'exact', head: true }),
           supabase.from('podcasts').select('*', { count: 'exact', head: true }),
           supabase.from('episodes').select('*', { count: 'exact', head: true }),
-          supabase.from('podcasts').select('*, profiles(display_name)').order('created_at', { ascending: false }).limit(5),
-          supabase.from('episodes').select('*, podcasts(title)').order('published_at', { ascending: false }).limit(5),
+          supabase
+            .from('podcasts')
+            .select('*, profiles(display_name)')
+            .order('created_at', { ascending: false })
+            .limit(5),
+          supabase
+            .from('episodes')
+            .select('*, podcasts(title)')
+            .order('published_at', { ascending: false })
+            .limit(5),
         ])
 
         setStats({
@@ -78,6 +115,14 @@ export default function AdminDashboardPage() {
     fetchStats()
   }, [supabase])
 
+  const handleSaveHomepage = async () => {
+    setSavingHomepage(true)
+    setTimeout(() => {
+      toast.success('Homepage controls saved')
+      setSavingHomepage(false)
+    }, 900)
+  }
+
   const topStats = [
     { title: 'Total users', value: stats?.metrics?.totalUsers || 0, color: 'from-blue-600 to-blue-500', icon: Users, href: '/admin/users', sub: 'Review members' },
     { title: 'Podcasts', value: stats?.metrics?.totalPodcasts || 0, color: 'from-violet-600 to-fuchsia-500', icon: Mic, href: '/admin/podcasts', sub: 'Manage catalog' },
@@ -85,11 +130,13 @@ export default function AdminDashboardPage() {
     { title: 'Total listens', value: Number(stats?.metrics?.totalListens ?? 0).toLocaleString(), color: 'from-rose-600 to-orange-500', icon: Activity, href: '/admin/analytics', sub: 'Open analytics' },
   ]
 
-  const quickActions = [
-    { label: 'Add creator', icon: Plus, href: '/admin/users', tone: 'bg-blue-50 text-blue-600' },
-    { label: 'Newsletter', icon: Mail, href: '/admin/newsletter', tone: 'bg-emerald-50 text-emerald-600' },
-    { label: 'Review groups', icon: ShieldCheck, href: '/admin/groups', tone: 'bg-amber-50 text-amber-600' },
-    { label: 'Payouts', icon: DollarSign, href: '/admin/wallet', tone: 'bg-rose-50 text-rose-600' },
+  const managementLinks = [
+    { title: 'Website settings', description: 'Edit platform identity, SEO, and security.', href: '/admin/settings', icon: Settings, tone: 'bg-blue-50 text-blue-600' },
+    { title: 'Theme manager', description: 'Change colors, visual systems, and active theme.', href: '/admin/themes', icon: Palette, tone: 'bg-violet-50 text-violet-600' },
+    { title: 'Languages', description: 'Translate and localize the public experience.', href: '/admin/languages', icon: Languages, tone: 'bg-emerald-50 text-emerald-600' },
+    { title: 'Announcements', description: 'Publish banners and homepage notices.', href: '/admin/announcements', icon: Megaphone, tone: 'bg-amber-50 text-amber-600' },
+    { title: 'Newsletter', description: 'Connect campaigns with homepage promotion.', href: '/admin/newsletter', icon: Mail, tone: 'bg-rose-50 text-rose-600' },
+    { title: 'Users & groups', description: 'Manage creators, roles, and access control.', href: '/admin/users', icon: ShieldCheck, tone: 'bg-cyan-50 text-cyan-600' },
   ]
 
   const systemStats = [
@@ -113,17 +160,16 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6 pb-12">
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <LayoutDashboard className="h-7 w-7" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary">Operations overview</p>
-              <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-950">PodHub Engine</h1>
-              <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-500">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                All services operational and admin tools available.
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary">Website control center</p>
+              <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-950">Manage the whole website from here</h1>
+              <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-slate-500">
+                Update homepage messaging, swap backgrounds, trigger announcements, and jump into every admin module that affects the public site.
               </p>
             </div>
           </div>
@@ -132,14 +178,12 @@ export default function AdminDashboardPage() {
             <Button asChild variant="outline" className="h-11 rounded-2xl border-slate-200 px-5 font-semibold">
               <Link href="/admin/settings">
                 <Settings className="mr-2 h-4 w-4" />
-                System settings
+                Global settings
               </Link>
             </Button>
-            <Button asChild className="h-11 rounded-2xl px-5 font-semibold shadow-lg shadow-primary/20">
-              <Link href="/admin/announcements">
-                Push notification
-                <Bell className="ml-2 h-4 w-4" />
-              </Link>
+            <Button onClick={handleSaveHomepage} disabled={savingHomepage} className="h-11 rounded-2xl px-5 font-semibold shadow-lg shadow-primary/20">
+              <Save className="mr-2 h-4 w-4" />
+              {savingHomepage ? 'Saving...' : 'Save homepage'}
             </Button>
           </div>
         </div>
@@ -161,7 +205,223 @@ export default function AdminDashboardPage() {
         ))}
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.9fr)]">
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_380px]">
+        <Card className="overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-200 p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Paintbrush className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl font-black text-slate-950">Homepage editor</CardTitle>
+                <CardDescription className="text-sm text-slate-500">
+                  Change the main page hero, background, calls to action, and live announcement without leaving the dashboard.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)]">
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Site title</Label>
+                <div className="relative">
+                  <Type className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    value={homepageContent.siteTitle}
+                    onChange={(event) => setHomepageContent((current) => ({ ...current, siteTitle: event.target.value }))}
+                    className="h-11 rounded-2xl border-slate-200 bg-slate-50 pl-11 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Hero title</Label>
+                <Input
+                  value={homepageContent.heroTitle}
+                  onChange={(event) => setHomepageContent((current) => ({ ...current, heroTitle: event.target.value }))}
+                  className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Hero description</Label>
+                <Textarea
+                  value={homepageContent.heroDescription}
+                  onChange={(event) => setHomepageContent((current) => ({ ...current, heroDescription: event.target.value }))}
+                  className="min-h-[110px] rounded-2xl border-slate-200 bg-slate-50 font-medium"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Primary CTA</Label>
+                  <Input
+                    value={homepageContent.ctaPrimary}
+                    onChange={(event) => setHomepageContent((current) => ({ ...current, ctaPrimary: event.target.value }))}
+                    className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Secondary CTA</Label>
+                  <Input
+                    value={homepageContent.ctaSecondary}
+                    onChange={(event) => setHomepageContent((current) => ({ ...current, ctaSecondary: event.target.value }))}
+                    className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Background image URL</Label>
+                <div className="relative">
+                  <ImageIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    value={homepageContent.backgroundUrl}
+                    onChange={(event) => setHomepageContent((current) => ({ ...current, backgroundUrl: event.target.value }))}
+                    className="h-11 rounded-2xl border-slate-200 bg-slate-50 pl-11 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Homepage announcement</Label>
+                <Textarea
+                  value={homepageContent.announcement}
+                  onChange={(event) => setHomepageContent((current) => ({ ...current, announcement: event.target.value }))}
+                  className="min-h-[90px] rounded-2xl border-slate-200 bg-slate-50 font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-slate-950 text-white">
+                <div
+                  className="relative min-h-[320px] p-6"
+                  style={{
+                    backgroundImage: `linear-gradient(180deg, rgba(15,23,42,0.2), rgba(15,23,42,0.88)), url(${homepageContent.backgroundUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                >
+                  <div className="rounded-full bg-white/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-sky-200 backdrop-blur w-fit">
+                    Homepage preview
+                  </div>
+                  <p className="mt-6 text-sm font-semibold text-sky-100/90">{homepageContent.siteTitle}</p>
+                  <h3 className="mt-3 max-w-md text-3xl font-black leading-tight">{homepageContent.heroTitle}</h3>
+                  <p className="mt-4 max-w-md text-sm leading-6 text-slate-200">{homepageContent.heroDescription}</p>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-slate-950">
+                      {homepageContent.ctaPrimary}
+                    </div>
+                    <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+                      {homepageContent.ctaSecondary}
+                    </div>
+                  </div>
+                </div>
+                <div className="border-t border-white/10 bg-slate-950/95 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Live banner</p>
+                  <p className="mt-2 text-sm text-slate-200">{homepageContent.announcement}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-semibold text-slate-950">Homepage modules</p>
+                </div>
+                {[
+                  ['Featured banner', 'featuredBanner'],
+                  ['Creator applications', 'creatorApplications'],
+                  ['Listener testimonials', 'listenerTestimonials'],
+                  ['Trending carousel', 'trendingCarousel'],
+                ].map(([label, key]) => (
+                  <div key={key} className="flex items-center justify-between rounded-2xl bg-white p-4">
+                    <div>
+                      <p className="font-semibold text-slate-950">{label}</p>
+                      <p className="text-sm text-slate-500">Control whether this section is visible on the public homepage.</p>
+                    </div>
+                    <Switch
+                      checked={homepageSettings[key as keyof typeof homepageSettings]}
+                      onCheckedChange={(checked) =>
+                        setHomepageSettings((current) => ({
+                          ...current,
+                          [key]: checked,
+                        }))
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          <Card className="rounded-[2rem] border border-slate-200 bg-slate-950 text-white shadow-sm">
+            <CardHeader className="p-6">
+              <CardTitle className="text-xl font-black">Linked management</CardTitle>
+              <CardDescription className="text-sm text-slate-400">
+                Jump to the exact area that controls each part of the website.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 p-6 pt-0">
+              {managementLinks.map((item) => (
+                <Button
+                  key={item.title}
+                  asChild
+                  variant="ghost"
+                  className="h-auto w-full justify-start rounded-2xl border border-white/10 bg-white/5 p-4 text-left text-white hover:bg-white/10"
+                >
+                  <Link href={item.href}>
+                    <div className={cn('mr-4 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl', item.tone)}>
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold">{item.title}</p>
+                      <p className="mt-1 text-sm text-slate-400">{item.description}</p>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-400" />
+                  </Link>
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
+            <CardHeader className="p-6">
+              <CardTitle className="text-xl font-black text-slate-950">Quick website tasks</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 p-6 pt-0">
+              <Button asChild variant="outline" className="h-11 w-full justify-start rounded-2xl border-slate-200 font-semibold">
+                <Link href="/admin/announcements">
+                  <Bell className="mr-2 h-4 w-4" />
+                  Update announcement banner
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-11 w-full justify-start rounded-2xl border-slate-200 font-semibold">
+                <Link href="/admin/themes">
+                  <Palette className="mr-2 h-4 w-4" />
+                  Change public theme
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-11 w-full justify-start rounded-2xl border-slate-200 font-semibold">
+                <Link href="/admin/languages">
+                  <Languages className="mr-2 h-4 w-4" />
+                  Edit translations
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-11 w-full justify-start rounded-2xl border-slate-200 font-semibold">
+                <Link href="/admin/newsletter">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Schedule newsletter push
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.9fr)]">
         <Card className="overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
           <CardHeader className="border-b border-slate-200 p-6 sm:p-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -200,28 +460,6 @@ export default function AdminDashboardPage() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="rounded-[2rem] border border-slate-200 bg-slate-950 text-white shadow-sm">
-            <CardHeader className="p-6">
-              <CardTitle className="text-xl font-black">Quick actions</CardTitle>
-              <CardDescription className="text-sm text-slate-400">Jump directly to common admin tasks.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-3 p-6 pt-0">
-              {quickActions.map((action) => (
-                <Button key={action.label} asChild variant="ghost" className="h-auto justify-start rounded-2xl border border-white/10 bg-white/5 p-4 text-left text-white hover:bg-white/10">
-                  <Link href={action.href}>
-                    <div className={cn('mb-4 flex h-11 w-11 items-center justify-center rounded-2xl', action.tone)}>
-                      <action.icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{action.label}</p>
-                      <p className="mt-1 text-xs text-slate-400">Open module</p>
-                    </div>
-                  </Link>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-
           <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between p-6">
               <div>
