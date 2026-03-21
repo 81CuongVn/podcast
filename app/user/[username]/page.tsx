@@ -16,13 +16,33 @@ export default async function UserProfilePage({
   params: { username: string }
 }) {
   const supabase = await createClient()
+  const rawIdentifier = decodeURIComponent(params.username)
 
-  // Get user profile
-  const { data: profile } = await supabase
+  // Resolve profile from either username slug or user id.
+  let { data: profile } = await supabase
     .from('profiles')
     .select('*')
-    .eq('username', params.username)
+    .eq('username', rawIdentifier)
     .single()
+
+  if (!profile) {
+    const { data: byId } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', rawIdentifier)
+      .single()
+    profile = byId
+  }
+
+  if (!profile && rawIdentifier.includes('-')) {
+    const usernameWithoutSuffix = rawIdentifier.replace(/-[^-]+$/, '')
+    const { data: bySlugPrefix } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', usernameWithoutSuffix)
+      .single()
+    profile = bySlugPrefix
+  }
 
   if (!profile) {
     notFound()
