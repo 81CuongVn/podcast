@@ -16,8 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: settings.siteTitle,
     description: settings.siteDescription,
-    keywords:
-      'podcast hosting, podcast distribution, create podcast, podcast analytics, podcast platform, audio streaming',
+    keywords: settings.seoKeywords,
     authors: [{ name: `${settings.siteTitle} Team` }],
     openGraph: {
       title: `${settings.siteTitle} - Create & Share Podcasts`,

@@ -21,19 +21,31 @@ export default function AdminSettingsPage() {
   const [siteTitle, setSiteTitle] = useState(DEFAULT_SITE_SETTINGS.siteTitle)
   const [siteDescription, setSiteDescription] = useState(DEFAULT_SITE_SETTINGS.siteDescription)
   const [siteDomain, setSiteDomain] = useState(DEFAULT_SITE_SETTINGS.siteDomain)
-  const [bgImage, setBgImage] = useState('https://images.unsplash.com/photo-1590602847861-f357a9332bbc')
-  const [primaryColor, setPrimaryColor] = useState('#6366f1')
+  const [twitterUrl, setTwitterUrl] = useState(DEFAULT_SITE_SETTINGS.twitterUrl)
+  const [instagramUrl, setInstagramUrl] = useState(DEFAULT_SITE_SETTINGS.instagramUrl)
+  const [contactEmail, setContactEmail] = useState(DEFAULT_SITE_SETTINGS.contactEmail)
+  const [bgImage, setBgImage] = useState(DEFAULT_SITE_SETTINGS.backgroundImage)
+  const [primaryColor, setPrimaryColor] = useState(DEFAULT_SITE_SETTINGS.primaryColor)
   const [appearance, setAppearance] = useState({
-    glassmorphism: true,
-    darkMode: true,
-    mobileNav: true,
+    glassmorphism: DEFAULT_SITE_SETTINGS.glassmorphism,
+    darkMode: DEFAULT_SITE_SETTINGS.darkMode,
+    mobileNav: DEFAULT_SITE_SETTINGS.mobileNav,
   })
   const [security, setSecurity] = useState({
     publicRegistration: DEFAULT_SITE_SETTINGS.publicRegistration,
-    emailVerification: true,
-    moderatorDashboard: false,
+    emailVerification: DEFAULT_SITE_SETTINGS.emailVerification,
+    moderatorDashboard: DEFAULT_SITE_SETTINGS.moderatorDashboard,
     maintenanceMode: DEFAULT_SITE_SETTINGS.maintenanceMode,
   })
+  const [googleAnalyticsId, setGoogleAnalyticsId] = useState(
+    DEFAULT_SITE_SETTINGS.googleAnalyticsId
+  )
+  const [facebookPixelId, setFacebookPixelId] = useState(
+    DEFAULT_SITE_SETTINGS.facebookPixelId
+  )
+  const [seoKeywords, setSeoKeywords] = useState(DEFAULT_SITE_SETTINGS.seoKeywords)
+  const [customCss, setCustomCss] = useState(DEFAULT_SITE_SETTINGS.customCss)
+  const [customJs, setCustomJs] = useState(DEFAULT_SITE_SETTINGS.customJs)
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -47,11 +59,28 @@ export default function AdminSettingsPage() {
         setSiteTitle(persisted.siteTitle)
         setSiteDescription(persisted.siteDescription)
         setSiteDomain(persisted.siteDomain)
+        setTwitterUrl(persisted.twitterUrl)
+        setInstagramUrl(persisted.instagramUrl)
+        setContactEmail(persisted.contactEmail)
+        setBgImage(persisted.backgroundImage)
+        setPrimaryColor(persisted.primaryColor)
+        setAppearance({
+          glassmorphism: persisted.glassmorphism,
+          darkMode: persisted.darkMode,
+          mobileNav: persisted.mobileNav,
+        })
         setSecurity((current) => ({
           ...current,
           publicRegistration: persisted.publicRegistration,
+          emailVerification: persisted.emailVerification,
+          moderatorDashboard: persisted.moderatorDashboard,
           maintenanceMode: persisted.maintenanceMode,
         }))
+        setGoogleAnalyticsId(persisted.googleAnalyticsId)
+        setFacebookPixelId(persisted.facebookPixelId)
+        setSeoKeywords(persisted.seoKeywords)
+        setCustomCss(persisted.customCss)
+        setCustomJs(persisted.customJs)
       } catch {
         // Keep defaults on transient failures.
       }
@@ -68,8 +97,23 @@ export default function AdminSettingsPage() {
         siteTitle,
         siteDescription,
         siteDomain,
+        twitterUrl,
+        instagramUrl,
+        contactEmail,
+        backgroundImage: bgImage,
+        primaryColor,
+        glassmorphism: appearance.glassmorphism,
+        darkMode: appearance.darkMode,
+        mobileNav: appearance.mobileNav,
         publicRegistration: security.publicRegistration,
+        emailVerification: security.emailVerification,
+        moderatorDashboard: security.moderatorDashboard,
         maintenanceMode: security.maintenanceMode,
+        googleAnalyticsId,
+        facebookPixelId,
+        seoKeywords,
+        customCss,
+        customJs,
       })
 
       const response = await fetch('/api/site-settings', {
@@ -88,11 +132,28 @@ export default function AdminSettingsPage() {
       setSiteTitle(savedSettings.siteTitle)
       setSiteDescription(savedSettings.siteDescription)
       setSiteDomain(savedSettings.siteDomain)
+      setTwitterUrl(savedSettings.twitterUrl)
+      setInstagramUrl(savedSettings.instagramUrl)
+      setContactEmail(savedSettings.contactEmail)
+      setBgImage(savedSettings.backgroundImage)
+      setPrimaryColor(savedSettings.primaryColor)
+      setAppearance({
+        glassmorphism: savedSettings.glassmorphism,
+        darkMode: savedSettings.darkMode,
+        mobileNav: savedSettings.mobileNav,
+      })
       setSecurity((current) => ({
         ...current,
         publicRegistration: savedSettings.publicRegistration,
+        emailVerification: savedSettings.emailVerification,
+        moderatorDashboard: savedSettings.moderatorDashboard,
         maintenanceMode: savedSettings.maintenanceMode,
       }))
+      setGoogleAnalyticsId(savedSettings.googleAnalyticsId)
+      setFacebookPixelId(savedSettings.facebookPixelId)
+      setSeoKeywords(savedSettings.seoKeywords)
+      setCustomCss(savedSettings.customCss)
+      setCustomJs(savedSettings.customJs)
       window.dispatchEvent(new CustomEvent('site-settings-updated', { detail: savedSettings }))
 
       toast.success('System settings updated successfully')
@@ -204,15 +265,15 @@ export default function AdminSettingsPage() {
               <CardContent className="space-y-5 p-6 pt-0">
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Twitter / X</Label>
-                  <Input placeholder="https://x.com/your-handle" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
+                  <Input value={twitterUrl} onChange={(e) => setTwitterUrl(e.target.value)} placeholder="https://x.com/your-handle" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Instagram</Label>
-                  <Input placeholder="https://instagram.com/your-handle" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
+                  <Input value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/your-handle" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Contact email</Label>
-                  <Input type="email" placeholder="hello@podhub.com" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
+                  <Input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="hello@podhub.com" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
                 </div>
               </CardContent>
             </Card>
@@ -382,16 +443,16 @@ export default function AdminSettingsPage() {
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Google Analytics ID</Label>
-                  <Input placeholder="UA-XXXXX-Y" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
+                  <Input value={googleAnalyticsId} onChange={(e) => setGoogleAnalyticsId(e.target.value)} placeholder="UA-XXXXX-Y" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Facebook Pixel ID</Label>
-                  <Input placeholder="1234567890" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
+                  <Input value={facebookPixelId} onChange={(e) => setFacebookPixelId(e.target.value)} placeholder="1234567890" className="h-11 rounded-2xl border-slate-200 bg-slate-50 font-medium" />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">SEO keywords</Label>
-                <Textarea placeholder="podcast, audio, creator, streaming, music..." className="min-h-[120px] rounded-2xl border-slate-200 bg-slate-50 font-medium" />
+                <Textarea value={seoKeywords} onChange={(e) => setSeoKeywords(e.target.value)} placeholder="podcast, audio, creator, streaming, music..." className="min-h-[120px] rounded-2xl border-slate-200 bg-slate-50 font-medium" />
               </div>
             </CardContent>
           </Card>
@@ -413,11 +474,11 @@ export default function AdminSettingsPage() {
             <CardContent className="space-y-5 p-6 pt-0">
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Custom CSS</Label>
-                <Textarea placeholder="/* Add your custom styles here */" className="min-h-[180px] rounded-2xl border-slate-800 bg-slate-950 font-mono text-sm text-emerald-400" />
+                <Textarea value={customCss} onChange={(e) => setCustomCss(e.target.value)} placeholder="/* Add your custom styles here */" className="min-h-[180px] rounded-2xl border-slate-800 bg-slate-950 font-mono text-sm text-emerald-400" />
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Custom JS</Label>
-                <Textarea placeholder="// Add your custom scripts here" className="min-h-[180px] rounded-2xl border-slate-800 bg-slate-950 font-mono text-sm text-blue-400" />
+                <Textarea value={customJs} onChange={(e) => setCustomJs(e.target.value)} placeholder="// Add your custom scripts here" className="min-h-[180px] rounded-2xl border-slate-800 bg-slate-950 font-mono text-sm text-blue-400" />
               </div>
               <div className="flex flex-col gap-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-start gap-3">

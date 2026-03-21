@@ -92,6 +92,10 @@ export default async function HomePage() {
         {/* Hero Section */}
         <section className="relative overflow-hidden pt-20 pb-32 md:pt-40 md:pb-48">
           <SwirlingVoiceBackground />
+          <div
+            className="absolute inset-0 -z-20 bg-cover bg-center opacity-20"
+            style={{ backgroundImage: `url(${siteSettings.backgroundImage})` }}
+          />
           {/* Animated Background Gradients */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden">
             <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/20 blur-[140px] animate-pulse" />
@@ -110,7 +114,7 @@ export default async function HomePage() {
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-accent animate-gradient-x">Amplified</span>
               </h1>
               <p className="mb-14 text-xl text-muted-foreground text-balance md:text-3xl max-w-3xl mx-auto leading-tight font-medium opacity-80">
-                The professional all-in-one platform to record, distribute, and monetize your stories.
+                {siteSettings.siteDescription}
               </p>
 
               <HeroButtons 
@@ -324,7 +328,7 @@ export default async function HomePage() {
                 <div className="relative z-10">
                   <h2 className="text-4xl md:text-6xl font-black text-white mb-8">Ready to broadcast?</h2>
                   <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">
-                    Join thousands of creators who chose PodHub to host their shows. Get all features free for 14 days.
+                    Join thousands of creators who chose {siteSettings.siteTitle} to host their shows. Get all features free for 14 days.
                   </p>
                   <Button asChild size="lg" variant="secondary" className="h-16 px-12 text-xl font-bold rounded-full shadow-2xl hover:scale-105 transition-all">
                     <Link href="/auth/sign-up">Get Started Now</Link>
@@ -398,7 +402,7 @@ export default async function HomePage() {
               <div className="w-full md:w-80 space-y-4">
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input placeholder="Enter your email" className="h-14 pl-12 rounded-2xl bg-background border-border/50" />
+                  <Input type="email" placeholder={siteSettings.contactEmail || 'Enter your email'} className="h-14 pl-12 rounded-2xl bg-background border-border/50" />
                 </div>
                 <Button className="w-full h-14 rounded-2xl font-bold text-lg shadow-xl shadow-primary/20">
                   Join Newsletter

@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Headphones, Github, Twitter, Mail } from 'lucide-react'
+import { Headphones, Github, Twitter, Mail, Instagram } from 'lucide-react'
 import { useSiteSettings } from '@/hooks/use-site-settings'
 
 export function Footer() {
-  const { siteTitle, publicRegistration } = useSiteSettings()
+  const { siteTitle, publicRegistration, twitterUrl, instagramUrl, contactEmail } = useSiteSettings()
 
   return (
     <footer className="border-t border-border bg-background">
@@ -23,13 +23,18 @@ export function Footer() {
               Create and share podcasts with the world. Discover amazing shows from creators everywhere. Build your audience and grow together.
             </p>
             <div className="mt-4 flex gap-4">
-              <a href="https://twitter.com/johnweek45" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href={twitterUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
+              {instagramUrl && (
+                <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                  <Instagram className="h-5 w-5" />
+                </a>
+              )}
               <a href="https://github.com/81CuongVn" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Github className="h-5 w-5" />
               </a>
-              <a href="mailto:support@podstream.com" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href={`mailto:${contactEmail}`} className="text-muted-foreground hover:text-primary transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
             </div>

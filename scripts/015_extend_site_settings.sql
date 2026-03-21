@@ -1,0 +1,16 @@
+ALTER TABLE public.site_settings
+  ADD COLUMN IF NOT EXISTS twitter_url TEXT NOT NULL DEFAULT 'https://twitter.com/johnweek45',
+  ADD COLUMN IF NOT EXISTS instagram_url TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS contact_email TEXT NOT NULL DEFAULT 'support@podstream.com',
+  ADD COLUMN IF NOT EXISTS background_image TEXT NOT NULL DEFAULT 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc',
+  ADD COLUMN IF NOT EXISTS primary_color TEXT NOT NULL DEFAULT '#6366f1',
+  ADD COLUMN IF NOT EXISTS glassmorphism BOOLEAN NOT NULL DEFAULT true,
+  ADD COLUMN IF NOT EXISTS dark_mode BOOLEAN NOT NULL DEFAULT true,
+  ADD COLUMN IF NOT EXISTS mobile_nav BOOLEAN NOT NULL DEFAULT true,
+  ADD COLUMN IF NOT EXISTS email_verification BOOLEAN NOT NULL DEFAULT true,
+  ADD COLUMN IF NOT EXISTS moderator_dashboard BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS google_analytics_id TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS facebook_pixel_id TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS seo_keywords TEXT NOT NULL DEFAULT 'podcast, audio, creator, streaming, music',
+  ADD COLUMN IF NOT EXISTS custom_css TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS custom_js TEXT NOT NULL DEFAULT '';

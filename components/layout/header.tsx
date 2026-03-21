@@ -20,7 +20,14 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const supabase = createClient()
-  const { siteTitle, publicRegistration, maintenanceMode } = useSiteSettings()
+  const {
+    siteTitle,
+    publicRegistration,
+    maintenanceMode,
+    glassmorphism,
+    mobileNav,
+    primaryColor,
+  } = useSiteSettings()
 
   useEffect(() => {
     setMounted(true)
@@ -60,7 +67,9 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         scrolled 
-          ? "py-3 bg-background/80 backdrop-blur-2xl border-b border-border/50 shadow-lg" 
+          ? glassmorphism
+            ? "py-3 bg-background/80 backdrop-blur-2xl border-b border-border/50 shadow-lg"
+            : "py-3 bg-background border-b border-border/50 shadow-lg"
           : "py-6 bg-transparent"
       )}
     >
@@ -69,7 +78,8 @@ export function Header() {
         <Link href="/" className="flex items-center gap-3 group">
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
-            className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary via-purple-500 to-accent shadow-xl shadow-primary/20 relative overflow-hidden"
+            className="flex items-center justify-center w-12 h-12 rounded-2xl shadow-xl shadow-primary/20 relative overflow-hidden"
+            style={{ background: `linear-gradient(135deg, ${primaryColor}, #9333ea)` }}
           >
             <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             <Mic className="h-6 w-6 text-white relative z-10" />
@@ -157,18 +167,20 @@ export function Header() {
         </div>
 
         {/* Mobile Menu Button */}
-        <motion.button 
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden p-3 rounded-2xl bg-muted/50 text-foreground border border-border/50 shadow-sm"
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </motion.button>
+        {mobileNav && (
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-3 rounded-2xl bg-muted/50 text-foreground border border-border/50 shadow-sm"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </motion.button>
+        )}
       </div>
 
       {/* Mobile Menu */}
       <AnimatePresence>
-        {mobileMenuOpen && (
+        {mobileNav && mobileMenuOpen && (
           <motion.div 
             initial={{ opacity: 0, height: 0, y: -20 }}
             animate={{ opacity: 1, height: 'auto', y: 0 }}
