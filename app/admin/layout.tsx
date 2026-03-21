@@ -76,9 +76,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     if (isMobile) setIsSidebarOpen(false)
   }, [pathname, isMobile])
 
-  if (isAdmin === false) redirect('/')
-  if (isAdmin === null) return null
-
   const menuGroups = useMemo(
     () => [
       {
@@ -121,6 +118,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     ],
     []
   )
+
+  if (isAdmin === false) redirect('/')
+  if (isAdmin === null) return null
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 lg:flex">
