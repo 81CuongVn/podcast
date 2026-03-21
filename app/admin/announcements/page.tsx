@@ -7,15 +7,15 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { 
-  Megaphone, 
-  Send, 
-  History, 
-  Plus, 
-  Search, 
-  MoreVertical, 
-  Trash2, 
-  Eye, 
+import {
+  Megaphone,
+  Send,
+  History,
+  Plus,
+  Search,
+  MoreVertical,
+  Trash2,
+  Eye,
   CheckCircle2,
   Clock,
   ArrowRight,
@@ -38,11 +38,27 @@ const announcements = [
 
 export default function AdminAnnouncementsPage() {
   const [loading, setLoading] = useState(false)
+  const [title, setTitle] = useState('')
+  const [type, setType] = useState('System Update')
+  const [priority, setPriority] = useState('Low Priority')
+  const [body, setBody] = useState('')
 
   const handlePost = () => {
+    if (!title.trim()) {
+      toast.error('Announcement title is required')
+      return
+    }
+    if (!body.trim()) {
+      toast.error('Announcement body is required')
+      return
+    }
     setLoading(true)
     setTimeout(() => {
-      toast.success('Announcement published successfully!')
+      toast.success(`Published: "${title}"`)
+      setTitle('')
+      setBody('')
+      setType('System Update')
+      setPriority('Low Priority')
       setLoading(false)
     }, 1200)
   }
@@ -86,15 +102,17 @@ export default function AdminAnnouncementsPage() {
           <CardContent className="p-0 space-y-8">
             <div className="space-y-3">
               <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Announcement Title</Label>
-              <Input 
+              <Input
                 placeholder="Important: System Maintenance Scheduled"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 className="rounded-2xl h-14 px-6 bg-slate-50 border-none font-bold text-lg focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Type</Label>
-                <select className="w-full h-14 rounded-2xl px-6 bg-slate-50 border-none font-bold text-base focus:ring-2 focus:ring-primary/20 transition-all appearance-none outline-none">
+                <select value={type} onChange={(e) => setType(e.target.value)} className="w-full h-14 rounded-2xl px-6 bg-slate-50 border-none font-bold text-base focus:ring-2 focus:ring-primary/20 transition-all appearance-none outline-none">
                   <option>System Update</option>
                   <option>New Feature</option>
                   <option>Security Alert</option>
@@ -103,7 +121,7 @@ export default function AdminAnnouncementsPage() {
               </div>
               <div className="space-y-3">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Priority Level</Label>
-                <select className="w-full h-14 rounded-2xl px-6 bg-slate-50 border-none font-bold text-base focus:ring-2 focus:ring-primary/20 transition-all appearance-none outline-none">
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full h-14 rounded-2xl px-6 bg-slate-50 border-none font-bold text-base focus:ring-2 focus:ring-primary/20 transition-all appearance-none outline-none">
                   <option>Low Priority</option>
                   <option>Medium Priority</option>
                   <option>High Priority</option>
@@ -113,8 +131,10 @@ export default function AdminAnnouncementsPage() {
             </div>
             <div className="space-y-3">
               <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Announcement Body</Label>
-              <Textarea 
+              <Textarea
                 placeholder="Write your announcement details here..."
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
                 className="rounded-2xl bg-slate-50 border-none font-bold min-h-[200px] p-8 focus:ring-2 focus:ring-primary/20 transition-all text-lg leading-relaxed"
               />
             </div>
@@ -141,11 +161,11 @@ export default function AdminAnnouncementsPage() {
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         "h-10 w-10 rounded-xl flex items-center justify-center",
-                        a.priority === 'High' ? 'bg-rose-50 text-rose-500' : 
-                        a.priority === 'Medium' ? 'bg-amber-50 text-amber-500' : 'bg-blue-50 text-blue-500'
+                        a.priority === 'High' ? 'bg-rose-50 text-rose-500' :
+                          a.priority === 'Medium' ? 'bg-amber-50 text-amber-500' : 'bg-blue-50 text-blue-500'
                       )}>
-                        {a.priority === 'High' ? <AlertTriangle className="h-5 w-5" /> : 
-                         a.priority === 'Medium' ? <Info className="h-5 w-5" /> : <Megaphone className="h-5 w-5" />}
+                        {a.priority === 'High' ? <AlertTriangle className="h-5 w-5" /> :
+                          a.priority === 'Medium' ? <Info className="h-5 w-5" /> : <Megaphone className="h-5 w-5" />}
                       </div>
                       <div>
                         <p className="font-black text-sm text-slate-900 group-hover:text-primary transition-colors">{a.title}</p>

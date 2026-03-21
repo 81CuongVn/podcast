@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Search, MoreVertical, CheckCircle2, Clock, Globe, FileText, Sparkles, Type, Download, Filter } from 'lucide-react'
+import { Plus, Search, MoreVertical, CheckCircle2, Clock, Globe, FileText, Sparkles, Type, Download, Filter, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -37,6 +37,13 @@ export default function AdminLanguagesPage() {
 
   return (
     <div className="space-y-6 pb-12">
+      <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+        <div>
+          <p className="text-sm font-bold text-amber-900">Demo data</p>
+          <p className="mt-0.5 text-sm text-amber-700">Language packs shown here are sample data for demonstration. Integrating a real i18n system requires connecting a translation service.</p>
+        </div>
+      </div>
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -186,10 +193,11 @@ export default function AdminLanguagesPage() {
                 <p className="text-sm font-semibold">2 packs below 90% completeness</p>
                 <p className="mt-1 text-sm text-slate-400">German and Arabic are the best candidates for automation.</p>
               </div>
-              <Button className="h-11 w-full rounded-2xl bg-white font-semibold text-slate-950 hover:bg-white/90">
+              <Button disabled className="h-11 w-full rounded-2xl bg-white/60 font-semibold text-slate-500 cursor-not-allowed" title="Requires a translation service integration">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Initialize auto-translate
               </Button>
+              <p className="text-[11px] text-slate-400 text-center">Requires translation service setup</p>
             </CardContent>
           </Card>
 
@@ -219,7 +227,7 @@ export default function AdminLanguagesPage() {
                   <Download className="mr-2 h-4 w-4" />
                   Export
                 </Button>
-                <Button className="h-11 flex-1 rounded-2xl font-semibold">
+                <Button disabled className="h-11 flex-1 rounded-2xl font-semibold opacity-50 cursor-not-allowed" title="Requires i18n service integration">
                   <Filter className="mr-2 h-4 w-4" />
                   Add override
                 </Button>

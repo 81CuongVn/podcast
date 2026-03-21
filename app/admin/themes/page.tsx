@@ -107,6 +107,13 @@ export default function AdminThemesPage() {
 
   return (
     <div className="space-y-6 pb-12">
+      <div className="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+        <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
+        <div>
+          <p className="text-sm font-bold text-blue-900">Preview mode</p>
+          <p className="mt-0.5 text-sm text-blue-700">Theme changes on this page are for preview and comparison only. To apply a theme to your live site, contact the development team or configure via the theme API.</p>
+        </div>
+      </div>
       <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
         <div className="grid gap-0 lg:grid-cols-[minmax(0,1.2fr)_380px]">
           <div className="p-6 sm:p-8">

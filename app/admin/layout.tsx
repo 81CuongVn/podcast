@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { redirect, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -22,19 +22,37 @@ import {
   LogOut,
   Menu,
   X,
+  CheckCheck,
+  Info,
+  AlertTriangle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useSiteSettings } from '@/hooks/use-site-settings'
 
+const initialNotifications = [
+  { id: '1', title: 'New user registered', body: 'A new creator signed up 2 hours ago.', icon: 'info', time: '2h ago', read: false },
+  { id: '2', title: 'Theme updated', body: 'Vibrant Pulse theme was activated.', icon: 'info', time: '5h ago', read: false },
+  { id: '3', title: 'Storage warning', body: 'Media storage is at 78% capacity.', icon: 'warning', time: '1d ago', read: true },
+]
+
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [notifications, setNotifications] = useState(initialNotifications)
+  const notifRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
   const { siteTitle } = useSiteSettings()
+
+  const unreadCount = notifications.filter((n) => !n.read).length
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  }
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -78,6 +96,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isMobile) setIsSidebarOpen(false)
   }, [pathname, isMobile])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false)
+      }
+    }
+    if (notifOpen) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [notifOpen])
 
   const menuGroups = useMemo(
     () => [
@@ -255,10 +283,41 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                   Back to homepage
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" className="relative rounded-xl text-slate-500">
-                <Bell className="h-4.5 w-4.5" />
-                <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
-              </Button>
+              <div ref={notifRef} className="relative">
+                <Button variant="ghost" size="icon" className="relative rounded-xl text-slate-500" onClick={() => setNotifOpen((v) => !v)}>
+                  <Bell className="h-4.5 w-4.5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                  )}
+                </Button>
+                {notifOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-[340px] rounded-2xl border border-slate-200 bg-white shadow-2xl z-50 overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                      <p className="text-sm font-bold text-slate-950">Notifications</p>
+                      {unreadCount > 0 && (
+                        <button onClick={markAllRead} className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+                          <CheckCheck className="h-3.5 w-3.5" /> Mark all read
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-50">
+                      {notifications.map((n) => (
+                        <div key={n.id} className={cn('flex items-start gap-3 px-5 py-4 transition', n.read ? 'opacity-60' : 'bg-blue-50/40')}>
+                          <div className={cn('mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl', n.icon === 'warning' ? 'bg-amber-50 text-amber-500' : 'bg-blue-50 text-blue-500')}>
+                            {n.icon === 'warning' ? <AlertTriangle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-slate-900">{n.title}</p>
+                            <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>
+                            <p className="mt-1 text-[10px] font-semibold text-slate-400">{n.time}</p>
+                          </div>
+                          {!n.read && <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               <Button variant="ghost" size="icon" className="rounded-xl text-slate-500">
                 <MessageSquare className="h-4.5 w-4.5" />
               </Button>
