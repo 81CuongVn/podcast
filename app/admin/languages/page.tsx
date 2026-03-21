@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -9,25 +8,16 @@ import {
   Plus, 
   Search, 
   MoreVertical, 
-  Trash2, 
-  Eye, 
   CheckCircle2,
   Clock,
-  ArrowRight,
   Globe,
   FileText,
-  MessageSquare,
   Sparkles,
-  Zap,
-  Check,
   Type,
-  Activity,
-  History,
   Download,
   Filter
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
@@ -40,12 +30,6 @@ const languages = [
 ]
 
 export default function AdminLanguagesPage() {
-  const [loading, setLoading] = useState(false)
-
-  const handleActivate = (id: string) => {
-    toast.success('Language activated successfully!')
-  }
-
   return (
     <div className="space-y-8 pb-20">
       {/* Header section */}
@@ -101,16 +85,16 @@ export default function AdminLanguagesPage() {
               <TableHeader className="bg-slate-50">
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="px-10 py-6 font-black text-slate-400 uppercase tracking-widest text-[11px]">Language Name</TableHead>
-                  <th className="font-black text-slate-400 uppercase tracking-widest text-[11px]">ISO Code</th>
-                  <th className="font-black text-slate-400 uppercase tracking-widest text-[11px]">Completeness</th>
-                  <th className="font-black text-slate-400 uppercase tracking-widest text-[11px]">Status</th>
-                  <th className="px-10 py-6 font-black text-slate-400 uppercase tracking-widest text-[11px] text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
+                  <TableHead className="font-black text-slate-400 uppercase tracking-widest text-[11px]">ISO Code</TableHead>
+                  <TableHead className="font-black text-slate-400 uppercase tracking-widest text-[11px]">Completeness</TableHead>
+                  <TableHead className="font-black text-slate-400 uppercase tracking-widest text-[11px]">Status</TableHead>
+                  <TableHead className="px-10 py-6 font-black text-slate-400 uppercase tracking-widest text-[11px] text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-slate-50">
                 {languages.map((lang) => (
-                  <tr key={lang.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-10 py-6">
+                  <TableRow key={lang.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <TableCell className="px-10 py-6">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:scale-110 group-hover:bg-primary/10 group-hover:text-primary transition-all">
                           <Globe className="h-5 w-5" />
@@ -120,11 +104,11 @@ export default function AdminLanguagesPage() {
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{lang.direction}</p>
                         </div>
                       </div>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       <code className="bg-slate-50 px-2 py-1 rounded-md font-mono text-[11px] font-black text-slate-500">{lang.code}</code>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-1.5 w-20 bg-slate-100 rounded-full overflow-hidden">
                           <div 
@@ -138,8 +122,8 @@ export default function AdminLanguagesPage() {
                         </div>
                         <span className="text-[10px] font-black text-slate-500">{lang.completeness}</span>
                       </div>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       {lang.status === 'Active' ? (
                         <div className="flex items-center gap-1.5 text-emerald-500 font-black text-[10px] uppercase tracking-widest">
                           <CheckCircle2 className="h-3.5 w-3.5" /> LIVE
@@ -149,8 +133,8 @@ export default function AdminLanguagesPage() {
                           <Clock className="h-3.5 w-3.5" /> INACTIVE
                         </div>
                       )}
-                    </td>
-                    <td className="px-10 py-6 text-right">
+                    </TableCell>
+                    <TableCell className="px-10 py-6 text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-slate-400 hover:text-primary hover:bg-primary/5 transition-all">
                           <FileText className="h-4 w-4" />
@@ -159,11 +143,11 @@ export default function AdminLanguagesPage() {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
 
