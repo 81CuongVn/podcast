@@ -3,13 +3,11 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { 
-  Users, 
-  Mic, 
-  Play, 
-  Activity, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Users,
+  Mic,
+  Play,
+  Activity,
   ArrowUpRight,
   MessageSquare,
   DollarSign,
@@ -21,20 +19,10 @@ import {
   Mail,
   LayoutDashboard,
   Settings,
-  Plus
+  Plus,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar
-} from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 
@@ -51,13 +39,13 @@ export default function AdminDashboardPage() {
           { count: podcastCount },
           { count: episodeCount },
           { data: recentPodcasts },
-          { data: recentEpisodes }
+          { data: recentEpisodes },
         ] = await Promise.all([
           supabase.from('profiles').select('*', { count: 'exact', head: true }),
           supabase.from('podcasts').select('*', { count: 'exact', head: true }),
           supabase.from('episodes').select('*', { count: 'exact', head: true }),
           supabase.from('podcasts').select('*, profiles(display_name)').order('created_at', { ascending: false }).limit(5),
-          supabase.from('episodes').select('*, podcasts(title)').order('published_at', { ascending: false }).limit(5)
+          supabase.from('episodes').select('*, podcasts(title)').order('published_at', { ascending: false }).limit(5),
         ])
 
         setStats({
@@ -65,10 +53,8 @@ export default function AdminDashboardPage() {
             totalUsers: userCount || 0,
             totalPodcasts: podcastCount || 0,
             totalEpisodes: episodeCount || 0,
-            totalListens: 12840, // Mocked until listens table is fully implemented
+            totalListens: 12840,
             onlineUsers: 3,
-            bannedUsers: 0,
-            notActivated: 2
           },
           recentPodcasts: recentPodcasts || [],
           recentEpisodes: recentEpisodes || [],
@@ -80,7 +66,7 @@ export default function AdminDashboardPage() {
             { name: 'May', listens: 6200, episodes: 64, users: 250 },
             { name: 'Jun', listens: 7500, episodes: 72, users: 310 },
             { name: 'Jul', listens: 8900, episodes: 85, users: 380 },
-          ]
+          ],
         })
       } catch (error) {
         console.error('Error fetching admin stats:', error)
@@ -88,250 +74,222 @@ export default function AdminDashboardPage() {
         setLoading(false)
       }
     }
+
     fetchStats()
   }, [supabase])
 
   const topStats = [
-    { title: 'Total Listeners', value: stats?.metrics?.totalUsers || 0, color: 'bg-gradient-to-br from-blue-600 to-blue-400', icon: Users, sub: 'View all users' },
-    { title: 'Total Podcasts', value: stats?.metrics?.totalPodcasts || 0, color: 'bg-gradient-to-br from-purple-600 to-purple-400', icon: Mic, sub: 'Manage podcasts' },
-    { title: 'Total Episodes', value: stats?.metrics?.totalEpisodes || 0, color: 'bg-gradient-to-br from-emerald-600 to-emerald-400', icon: Play, sub: 'Latest episodes' },
-    { title: 'Total Listens', value: stats?.metrics?.totalListens.toLocaleString() || '0', color: 'bg-gradient-to-br from-rose-600 to-rose-400', icon: Activity, sub: 'Analytics report' },
+    { title: 'Total users', value: stats?.metrics?.totalUsers || 0, color: 'from-blue-600 to-blue-500', icon: Users, href: '/admin/users', sub: 'Review members' },
+    { title: 'Podcasts', value: stats?.metrics?.totalPodcasts || 0, color: 'from-violet-600 to-fuchsia-500', icon: Mic, href: '/admin/podcasts', sub: 'Manage catalog' },
+    { title: 'Episodes', value: stats?.metrics?.totalEpisodes || 0, color: 'from-emerald-600 to-teal-500', icon: Play, href: '/admin/podcasts', sub: 'Check publishing' },
+    { title: 'Total listens', value: Number(stats?.metrics?.totalListens ?? 0).toLocaleString(), color: 'from-rose-600 to-orange-500', icon: Activity, href: '/admin/analytics', sub: 'Open analytics' },
   ]
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="font-black text-primary animate-pulse uppercase tracking-widest">Initialising Engine...</p>
+  const quickActions = [
+    { label: 'Add creator', icon: Plus, href: '/admin/users', tone: 'bg-blue-50 text-blue-600' },
+    { label: 'Newsletter', icon: Mail, href: '/admin/newsletter', tone: 'bg-emerald-50 text-emerald-600' },
+    { label: 'Review groups', icon: ShieldCheck, href: '/admin/groups', tone: 'bg-amber-50 text-amber-600' },
+    { label: 'Payouts', icon: DollarSign, href: '/admin/wallet', tone: 'bg-rose-50 text-rose-600' },
+  ]
+
+  const systemStats = [
+    { label: 'Users online', value: stats?.metrics?.onlineUsers ?? 0, icon: Globe, tone: 'bg-blue-50 text-blue-600' },
+    { label: 'Total likes', value: '1.2k', icon: Heart, tone: 'bg-emerald-50 text-emerald-600' },
+    { label: 'Comments', value: '458', icon: MessageSquare, tone: 'bg-amber-50 text-amber-600' },
+    { label: 'Total airtime', value: '84h', icon: Clock, tone: 'bg-rose-50 text-rose-600' },
+  ]
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-14 w-14 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-primary">Loading dashboard</p>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-border/40">
-        <div className="flex items-center gap-5">
-          <div className="h-16 w-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-            <LayoutDashboard className="h-8 w-8" />
+    <div className="space-y-6 pb-12">
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <LayoutDashboard className="h-7 w-7" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary">Operations overview</p>
+              <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-950">PodHub Engine</h1>
+              <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-500">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                All services operational and admin tools available.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900">PodHub Engine</h1>
-            <p className="text-muted-foreground text-sm font-bold flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              System Status: <span className="text-emerald-600">All Services Operational</span>
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-2xl font-bold border-2 h-12 px-6 hover:bg-slate-50">
-            <Settings className="mr-2 h-4 w-4" /> System Settings
-          </Button>
-          <Button className="rounded-2xl font-black shadow-xl shadow-primary/20 h-12 px-8 bg-primary hover:bg-primary/90">
-            Push Notification <Bell className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      </div>
 
-      {/* Primary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button asChild variant="outline" className="h-11 rounded-2xl border-slate-200 px-5 font-semibold">
+              <Link href="/admin/settings">
+                <Settings className="mr-2 h-4 w-4" />
+                System settings
+              </Link>
+            </Button>
+            <Button asChild className="h-11 rounded-2xl px-5 font-semibold shadow-lg shadow-primary/20">
+              <Link href="/admin/announcements">
+                Push notification
+                <Bell className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {topStats.map((stat) => (
-          <div key={stat.title} className={cn(
-            "p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer",
-            stat.color
-          )}>
-            <div className="absolute -right-4 -bottom-4 p-4 opacity-10 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
-              <stat.icon className="h-32 w-32" />
-            </div>
-            <div className="relative z-10">
-              <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6">
-                <stat.icon className="h-6 w-6" />
+          <Link key={stat.title} href={stat.href} className={cn('group overflow-hidden rounded-[2rem] bg-gradient-to-br p-6 text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl', stat.color)}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur">
+                <stat.icon className="h-5 w-5" />
               </div>
-              <p className="text-5xl font-black mb-1 tracking-tighter">{stat.value}</p>
-              <h3 className="text-lg font-bold opacity-90 mb-4">{stat.title}</h3>
-              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-black/10 w-fit px-3 py-1.5 rounded-full backdrop-blur-sm group-hover:bg-black/20 transition-colors">
-                {stat.sub} <ArrowUpRight className="h-3 w-3" />
-              </div>
+              <ArrowUpRight className="h-4 w-4 opacity-70 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </div>
-          </div>
+            <p className="mt-8 text-4xl font-black tracking-tight">{stat.value}</p>
+            <h2 className="mt-2 text-lg font-bold">{stat.title}</h2>
+            <p className="mt-1 text-sm text-white/75">{stat.sub}</p>
+          </Link>
         ))}
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Main Chart */}
-        <Card className="xl:col-span-2 rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
-          <CardHeader className="p-10 border-b border-border/40">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.9fr)]">
+        <Card className="overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-200 p-6 sm:p-7">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <CardTitle className="text-2xl font-black text-slate-900">Platform Growth</CardTitle>
-                <CardDescription className="font-bold text-slate-500">Total listens and engagement across all podcasts</CardDescription>
+                <CardTitle className="text-2xl font-black text-slate-950">Platform growth</CardTitle>
+                <CardDescription className="mt-1 text-sm text-slate-500">Listen volume over the last seven reporting periods.</CardDescription>
               </div>
-              <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white shadow-sm text-xs font-black uppercase tracking-wider text-primary">
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  Listens
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-400">
-                  <div className="h-2 w-2 rounded-full bg-slate-300" />
-                  Episodes
-                </div>
+              <div className="inline-flex w-fit items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 text-xs font-semibold">
+                <span className="rounded-xl bg-white px-3 py-2 text-primary shadow-sm">Listens</span>
+                <span className="px-3 py-2 text-slate-400">Episodes</span>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-10">
-            <div className="h-[450px] w-full">
+          <CardContent className="p-4 sm:p-6">
+            <div className="h-[320px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={stats.chartData}>
                   <defs>
                     <linearGradient id="colorListens" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.01}/>
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f1f5f9" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#64748b', fontSize: 13, fontWeight: '700' }}
-                    dy={15}
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12, fontWeight: '700' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12, fontWeight: '700' }} />
+                  <Tooltip
+                    cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, strokeDasharray: '4 4' }}
+                    contentStyle={{ borderRadius: '1rem', border: '1px solid #e2e8f0', boxShadow: '0 20px 35px rgba(15, 23, 42, 0.08)' }}
                   />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#64748b', fontSize: 13, fontWeight: '700' }}
-                    dx={-15}
-                  />
-                  <Tooltip 
-                    cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, strokeDasharray: '5 5' }}
-                    contentStyle={{ 
-                      borderRadius: '2rem', 
-                      border: 'none', 
-                      boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
-                      padding: '1.5rem',
-                      fontWeight: '800'
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="listens" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={5} 
-                    fillOpacity={1} 
-                    fill="url(#colorListens)" 
-                    animationDuration={2000}
-                  />
+                  <Area type="monotone" dataKey="listens" stroke="hsl(var(--primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorListens)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        {/* System & Recent Activity */}
-        <div className="space-y-8">
-          {/* Quick Actions */}
-          <Card className="rounded-[2.5rem] border-none shadow-xl bg-slate-900 text-white p-8">
-            <h3 className="text-xl font-black mb-6">Quick Actions</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white/5 hover:bg-white/10 transition-colors group">
-                <div className="h-12 w-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                  <Plus className="h-6 w-6" />
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest opacity-70">Add Creator</span>
-              </button>
-              <button className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white/5 hover:bg-white/10 transition-colors group">
-                <div className="h-12 w-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                  <Mail className="h-6 w-6" />
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest opacity-70">Newsletter</span>
-              </button>
-              <button className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white/5 hover:bg-white/10 transition-colors group">
-                <div className="h-12 w-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
-                  <ShieldCheck className="h-6 w-6" />
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest opacity-70">Review Mods</span>
-              </button>
-              <button className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white/5 hover:bg-white/10 transition-colors group">
-                <div className="h-12 w-12 rounded-2xl bg-rose-500/20 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
-                  <DollarSign className="h-6 w-6" />
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest opacity-70">Payouts</span>
-              </button>
-            </div>
+        <div className="space-y-6">
+          <Card className="rounded-[2rem] border border-slate-200 bg-slate-950 text-white shadow-sm">
+            <CardHeader className="p-6">
+              <CardTitle className="text-xl font-black">Quick actions</CardTitle>
+              <CardDescription className="text-sm text-slate-400">Jump directly to common admin tasks.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3 p-6 pt-0">
+              {quickActions.map((action) => (
+                <Button key={action.label} asChild variant="ghost" className="h-auto justify-start rounded-2xl border border-white/10 bg-white/5 p-4 text-left text-white hover:bg-white/10">
+                  <Link href={action.href}>
+                    <div className={cn('mb-4 flex h-11 w-11 items-center justify-center rounded-2xl', action.tone)}>
+                      <action.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{action.label}</p>
+                      <p className="mt-1 text-xs text-slate-400">Open module</p>
+                    </div>
+                  </Link>
+                </Button>
+              ))}
+            </CardContent>
           </Card>
 
-          {/* Newest Podcasts */}
-          <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 overflow-hidden">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-black text-slate-900">New Podcasts</h3>
-              <Link href="/admin/podcasts" className="text-xs font-black text-primary uppercase tracking-widest hover:underline">View All</Link>
-            </div>
-            <div className="space-y-6">
+          <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between p-6">
+              <div>
+                <CardTitle className="text-xl font-black text-slate-950">New podcasts</CardTitle>
+                <CardDescription className="mt-1 text-sm text-slate-500">Latest shows added by creators.</CardDescription>
+              </div>
+              <Button asChild variant="ghost" className="rounded-xl px-3 text-primary">
+                <Link href="/admin/podcasts">View all</Link>
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4 p-6 pt-0">
               {stats?.recentPodcasts?.map((podcast: any) => (
-                <div key={podcast.id} className="flex items-center gap-4 group cursor-pointer">
-                  <div className="h-14 w-14 rounded-2xl bg-slate-100 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+                <div key={podcast.id} className="flex items-center gap-4 rounded-2xl border border-slate-100 p-3">
+                  <div className="h-14 w-14 overflow-hidden rounded-2xl bg-slate-100">
                     {podcast.cover_url ? (
                       <img src={podcast.cover_url} alt="" className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary">
-                        <Mic className="h-6 w-6" />
+                      <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
+                        <Mic className="h-5 w-5" />
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-black text-sm text-slate-900 truncate group-hover:text-primary transition-colors">{podcast.title}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">by {podcast.profiles?.display_name || 'Unknown'}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-slate-900">{podcast.title}</p>
+                    <p className="truncate text-sm text-slate-500">by {podcast.profiles?.display_name || 'Unknown creator'}</p>
                   </div>
-                  <div className="text-[10px] font-black text-slate-300 uppercase shrink-0">
+                  <p className="text-xs font-semibold text-slate-400">
                     {new Date(podcast.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </div>
+                  </p>
                 </div>
               ))}
-            </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
+            <CardHeader className="p-6">
+              <CardTitle className="text-xl font-black text-slate-950">Recent episodes</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 p-6 pt-0">
+              {stats?.recentEpisodes?.map((episode: any) => (
+                <div key={episode.id} className="rounded-2xl border border-slate-100 p-4">
+                  <p className="truncate font-semibold text-slate-900">{episode.title}</p>
+                  <p className="mt-1 truncate text-sm text-slate-500">{episode.podcasts?.title || 'Unknown podcast'}</p>
+                  <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    {episode.published_at ? new Date(episode.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Draft'}
+                  </p>
+                </div>
+              ))}
+            </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
 
-      {/* Footer Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-8 rounded-[2.5rem] border-none bg-white shadow-sm flex items-center gap-6">
-          <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500">
-            <Globe className="h-7 w-7" />
-          </div>
-          <div>
-            <p className="text-2xl font-black text-slate-900">{stats?.metrics?.onlineUsers}</p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Users Online</p>
-          </div>
-        </Card>
-        <Card className="p-8 rounded-[2.5rem] border-none bg-white shadow-sm flex items-center gap-6">
-          <div className="h-14 w-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
-            <Heart className="h-7 w-7" />
-          </div>
-          <div>
-            <p className="text-2xl font-black text-slate-900">1.2k</p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Likes</p>
-          </div>
-        </Card>
-        <Card className="p-8 rounded-[2.5rem] border-none bg-white shadow-sm flex items-center gap-6">
-          <div className="h-14 w-14 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
-            <MessageSquare className="h-7 w-7" />
-          </div>
-          <div>
-            <p className="text-2xl font-black text-slate-900">458</p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Comments</p>
-          </div>
-        </Card>
-        <Card className="p-8 rounded-[2.5rem] border-none bg-white shadow-sm flex items-center gap-6">
-          <div className="h-14 w-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500">
-            <Clock className="h-7 w-7" />
-          </div>
-          <div>
-            <p className="text-2xl font-black text-slate-900">84h</p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Airtime</p>
-          </div>
-        </Card>
-      </div>
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {systemStats.map((item) => (
+          <Card key={item.label} className="rounded-[1.75rem] border border-slate-200 shadow-sm">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl', item.tone)}>
+                <item.icon className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-950">{item.value}</p>
+                <p className="text-sm text-slate-500">{item.label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </section>
     </div>
   )
 }
-

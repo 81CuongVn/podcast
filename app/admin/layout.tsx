@@ -1,44 +1,44 @@
 'use client'
 
-import { ReactNode, useState, useEffect } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { redirect, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { 
-  LayoutDashboard, 
-  Settings, 
-  Users, 
-  Mic, 
-  BarChart3, 
-  ShieldCheck, 
-  Globe, 
-  Palette, 
-  Languages, 
-  DollarSign, 
-  Megaphone, 
-  Mail, 
-  Search, 
-  Plus, 
-  Bell, 
-  MessageSquare, 
-  LogOut, 
-  ChevronRight, 
-  Menu, 
-  X 
+import {
+  LayoutDashboard,
+  Settings,
+  Users,
+  Mic,
+  BarChart3,
+  Palette,
+  Languages,
+  DollarSign,
+  Megaphone,
+  Mail,
+  Search,
+  Bell,
+  MessageSquare,
+  LogOut,
+  Menu,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
       if (!user) {
         setIsAdmin(false)
         return
@@ -52,102 +52,160 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       setIsAdmin(!!profile?.is_admin)
     }
+
     checkAdmin()
   }, [supabase])
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 1024px)')
+
+    const syncLayout = (matches: boolean) => {
+      setIsMobile(matches)
+      setIsSidebarOpen(!matches)
+    }
+
+    syncLayout(media.matches)
+
+    const handleChange = (event: MediaQueryListEvent) => syncLayout(event.matches)
+    media.addEventListener('change', handleChange)
+
+    return () => media.removeEventListener('change', handleChange)
+  }, [])
+
+  useEffect(() => {
+    if (isMobile) setIsSidebarOpen(false)
+  }, [pathname, isMobile])
 
   if (isAdmin === false) redirect('/')
   if (isAdmin === null) return null
 
-  const menuGroups = [
-    {
-      title: 'SYSTEM',
-      items: [
-        { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-        { href: '/admin/settings', label: 'Settings', icon: Settings },
-        { href: '/admin/themes', label: 'Themes', icon: Palette },
-        { href: '/admin/languages', label: 'Languages', icon: Languages },
-      ]
-    },
-    {
-      title: 'USERS',
-      items: [
-        { href: '/admin/users', label: 'Users', icon: Users },
-        { href: '/admin/groups', label: 'Users Groups', icon: Users },
-      ]
-    },
-    {
-      title: 'MODULES',
-      items: [
-        { href: '/admin/podcasts', label: 'Podcasts', icon: Mic },
-        { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-      ]
-    },
-    {
-      title: 'MONEY',
-      items: [
-        { href: '/admin/earnings', label: 'Earnings', icon: DollarSign },
-        { href: '/admin/wallet', label: 'Wallet', icon: DollarSign },
-      ]
-    },
-    {
-      title: 'REACH',
-      items: [
-        { href: '/admin/announcements', label: 'Announcements', icon: Megaphone },
-        { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
-      ]
-    }
-  ]
+  const menuGroups = useMemo(
+    () => [
+      {
+        title: 'System',
+        items: [
+          { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+          { href: '/admin/settings', label: 'Settings', icon: Settings },
+          { href: '/admin/themes', label: 'Themes', icon: Palette },
+          { href: '/admin/languages', label: 'Languages', icon: Languages },
+        ],
+      },
+      {
+        title: 'Users',
+        items: [
+          { href: '/admin/users', label: 'Users', icon: Users },
+          { href: '/admin/groups', label: 'Groups', icon: Users },
+        ],
+      },
+      {
+        title: 'Modules',
+        items: [
+          { href: '/admin/podcasts', label: 'Podcasts', icon: Mic },
+          { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+        ],
+      },
+      {
+        title: 'Revenue',
+        items: [
+          { href: '/admin/earnings', label: 'Earnings', icon: DollarSign },
+          { href: '/admin/wallet', label: 'Wallet', icon: DollarSign },
+        ],
+      },
+      {
+        title: 'Reach',
+        items: [
+          { href: '/admin/announcements', label: 'Announcements', icon: Megaphone },
+          { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
+        ],
+      },
+    ],
+    []
+  )
 
   return (
-    <div className="min-h-screen bg-[#f4f7fe] flex">
-      {/* Sidebar */}
-      <aside className={cn(
-        "bg-white border-r border-border transition-all duration-300 z-50 flex flex-col",
-        isSidebarOpen ? "w-72" : "w-20"
-      )}>
-        <div className="p-6 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
-            <Mic className="h-6 w-6" />
-          </div>
-          {isSidebarOpen && (
-            <span className="font-black text-2xl tracking-tighter text-primary">PodHub</span>
-          )}
+    <div className="min-h-screen bg-slate-100 text-slate-900 lg:flex">
+      {isMobile && isSidebarOpen && (
+        <button
+          aria-label="Close navigation overlay"
+          className="fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-sm"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 lg:static lg:z-auto lg:shadow-none',
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        )}
+      >
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-5">
+          <Link href="/admin" className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
+              <Mic className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-base font-black tracking-tight text-slate-950">PodHub Admin</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Control center</p>
+            </div>
+          </Link>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-xl lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 scrollbar-hide">
+        <div className="border-b border-slate-200 px-5 py-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search admin modules"
+              className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/10"
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-6 overflow-y-auto px-4 py-5">
           {menuGroups.map((group) => (
             <div key={group.title} className="space-y-2">
-              {isSidebarOpen && (
-                <h3 className="px-4 text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">
-                  {group.title}
-                </h3>
-              )}
+              <h3 className="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                {group.title}
+              </h3>
               <div className="space-y-1">
                 {group.items.map((item) => {
                   const Icon = item.icon
                   const active = pathname === item.href
+
                   return (
-                    <Link 
+                    <Link
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200 group relative",
-                        active 
-                          ? "bg-primary/5 text-primary" 
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                        'group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold transition',
+                        active
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
                       )}
                     >
-                      <Icon className={cn("h-5 w-5 shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
-                      {isSidebarOpen && (
-                        <>
-                          <span className="font-bold text-sm">{item.label}</span>
-                          {active && (
-                            <motion.div 
-                              layoutId="activeBar"
-                              className="absolute right-0 w-1 h-6 bg-primary rounded-l-full"
-                            />
-                          )}
-                        </>
+                      <div
+                        className={cn(
+                          'flex h-9 w-9 items-center justify-center rounded-xl transition',
+                          active ? 'bg-white text-primary shadow-sm' : 'bg-slate-100 text-slate-500 group-hover:bg-white'
+                        )}
+                      >
+                        <Icon className="h-4.5 w-4.5" />
+                      </div>
+                      <span>{item.label}</span>
+                      {active && (
+                        <motion.div
+                          layoutId="activeBar"
+                          className="absolute right-3 h-2 w-2 rounded-full bg-primary"
+                        />
                       )}
                     </Link>
                   )
@@ -157,65 +215,58 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           ))}
         </div>
 
-        <div className="p-4 border-t border-border/50">
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start gap-4 h-12 rounded-2xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 px-4"
+        <div className="border-t border-slate-200 p-4">
+          <Button
+            variant="ghost"
+            className="h-12 w-full justify-start gap-3 rounded-2xl px-3 text-slate-600 hover:bg-rose-50 hover:text-rose-600"
             onClick={() => supabase.auth.signOut()}
           >
-            <LogOut className="h-5 w-5" />
-            {isSidebarOpen && <span className="font-bold text-sm">Sign Out</span>}
+            <LogOut className="h-4.5 w-4.5" />
+            <span className="font-semibold">Sign out</span>
           </Button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navbar */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-border/50 px-8 flex items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center gap-4 flex-1 max-w-xl">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      <div className="flex min-w-0 flex-1 flex-col lg:min-h-screen">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+          <div className="flex h-[72px] items-center gap-4 px-4 sm:px-6 lg:px-8">
+            <Button
+              variant="ghost"
+              size="icon"
               className="rounded-xl"
+              onClick={() => setIsSidebarOpen((value) => !value)}
             >
-              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <Menu className="h-5 w-5" />
             </Button>
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input 
-                type="text" 
-                placeholder="Search metrics, users, podcasts..."
-                className="w-full h-11 pl-12 pr-4 rounded-xl bg-[#f4f7fe] border-none text-sm font-medium focus:ring-2 focus:ring-primary/20 transition-all"
-              />
-            </div>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="rounded-xl relative">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute top-3 right-3 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-xl">
-              <MessageSquare className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            <div className="h-8 w-px bg-border/50 mx-2" />
-            <div className="flex items-center gap-3 pl-2">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-black leading-none">Admin</p>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1">Super Admin</p>
+            <div className="hidden min-w-0 flex-1 md:block">
+              <p className="truncate text-sm font-semibold text-slate-500">
+                {pathname === '/admin' ? 'Dashboard overview' : pathname.replace('/admin/', '').replaceAll('/', ' / ')}
+              </p>
+            </div>
+
+            <div className="ml-auto flex items-center gap-2 sm:gap-3">
+              <Button variant="ghost" size="icon" className="relative rounded-xl text-slate-500">
+                <Bell className="h-4.5 w-4.5" />
+                <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              </Button>
+              <Button variant="ghost" size="icon" className="rounded-xl text-slate-500">
+                <MessageSquare className="h-4.5 w-4.5" />
+              </Button>
+              <div className="hidden h-8 w-px bg-slate-200 sm:block" />
+              <div className="flex items-center gap-3">
+                <div className="hidden text-right sm:block">
+                  <p className="text-sm font-bold text-slate-950">Admin</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Super admin</p>
+                </div>
+                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary to-cyan-500 shadow-lg shadow-primary/20" />
               </div>
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 shadow-lg shadow-primary/20" />
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 p-8 overflow-y-auto">
-          <div className="max-w-[1600px] mx-auto">
-            {children}
-          </div>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-[1440px]">{children}</div>
         </main>
       </div>
     </div>
