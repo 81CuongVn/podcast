@@ -86,7 +86,7 @@ export default function EpisodesPage({ params }: EpisodesPageProps) {
     }
   }
 
-  const CHUNK_SIZE = 5 * 1024 * 1024 // 5MB chunks
+  const CHUNK_SIZE = 2 * 1024 * 1024 // 2MB chunks (must stay under Next.js default body size limit)
   const MAX_FILE_SIZE_MB = 1000 // Keep in sync with API limit (1GB)
 
   async function uploadInChunks(file: File): Promise<{ pathname: string; url: string }> {
